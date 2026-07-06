@@ -15,9 +15,9 @@ def test_default_july_2026_has_solar_terms():
 def test_solar_term_reminder_is_system_title():
     reminders = solar_term_reminders_for_day(date(2026, 7, 7))
     assert len(reminders) == 1
-    assert reminders[0].title == "中国节气：小暑"
+    assert reminders[0].title == "小暑"
 
 
 def test_system_reminders_include_solar_terms():
     reminders = system_reminders_for_day(date(2026, 7, 23))
-    assert [r.title for r in reminders] == ["中国节气：大暑"]
+    assert [r.title for r in reminders] == ["大暑"]

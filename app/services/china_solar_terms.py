@@ -11,7 +11,7 @@ class SolarTermReminder:
 
     @property
     def title(self) -> str:
-        return f"中国节气：{self.name}"
+        return self.name
 
 
 SOLAR_TERMS_2026 = {

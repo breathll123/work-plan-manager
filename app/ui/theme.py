@@ -5,52 +5,52 @@ from PySide6.QtWidgets import QApplication
 
 COLORS = {
     "light": {
-        "window": "#EDE7DC",
-        "base": "#FFFDF7",
-        "paper": "#FFF9EC",
-        "paper_alt": "#FAF0DF",
-        "sidebar": "#2F4054",
-        "sidebar_text": "#F8F1E4",
-        "sidebar_muted": "#D5C8B5",
-        "text": "#1E252D",
-        "muted": "#746A5E",
-        "border": "#D8C7AA",
-        "accent": "#1D5C7A",
-        "accent_soft": "#E0EEF1",
-        "hover": "#F2E6D2",
-        "sel_bg": "#D8E7EB",
-        "cal_grid": "#D8C7AA",
-        "cal_out": "#A99B8A",
-        "cal_today": "#1D5C7A",
-        "cal_overdue": "#C6473A",
-        "cal_done_bg": "#E5DED2",
-        "cal_done_text": "#9C9285",
-        "cal_weekend_bg": "#F8ECDC",
-        "holiday_bg": "#F8DDD8",
+        "window": "#EAF1EC",
+        "base": "#FBFEFA",
+        "paper": "#F7FBF4",
+        "paper_alt": "#EEF7EF",
+        "sidebar": "#24443F",
+        "sidebar_text": "#F6FBF4",
+        "sidebar_muted": "#BFD6CA",
+        "text": "#21312D",
+        "muted": "#6B7D74",
+        "border": "#C7DAD0",
+        "accent": "#167168",
+        "accent_soft": "#DCEFEB",
+        "hover": "#EEF7F3",
+        "sel_bg": "#DCEFEB",
+        "cal_grid": "#CBDED3",
+        "cal_out": "#9BAEA5",
+        "cal_today": "#167168",
+        "cal_overdue": "#C65345",
+        "cal_done_bg": "#E1EAE4",
+        "cal_done_text": "#8FA098",
+        "cal_weekend_bg": "#EDF6F1",
+        "holiday_bg": "#F6DDD8",
     },
     "dark": {
-        "window": "#171A1E",
-        "base": "#22272D",
-        "paper": "#20262D",
-        "paper_alt": "#252C33",
-        "sidebar": "#111820",
-        "sidebar_text": "#EDE6D8",
-        "sidebar_muted": "#A99D8B",
-        "text": "#EFE8DC",
-        "muted": "#A99D8B",
-        "border": "#3B4650",
-        "accent": "#76B8D8",
-        "accent_soft": "#263C46",
-        "hover": "#2C343C",
-        "sel_bg": "#294251",
-        "cal_grid": "#3B4650",
-        "cal_out": "#68727B",
-        "cal_today": "#76B8D8",
-        "cal_overdue": "#E06B61",
-        "cal_done_bg": "#30353B",
-        "cal_done_text": "#777F87",
-        "cal_weekend_bg": "#252A2F",
-        "holiday_bg": "#3D2B2D",
+        "window": "#111B1B",
+        "base": "#1B2928",
+        "paper": "#172423",
+        "paper_alt": "#1D302E",
+        "sidebar": "#0C1717",
+        "sidebar_text": "#EDF7F2",
+        "sidebar_muted": "#94B7AA",
+        "text": "#EAF4EF",
+        "muted": "#9DB5AC",
+        "border": "#2F4B47",
+        "accent": "#73D0C1",
+        "accent_soft": "#1F3D39",
+        "hover": "#223532",
+        "sel_bg": "#1F3D39",
+        "cal_grid": "#31504B",
+        "cal_out": "#67827A",
+        "cal_today": "#73D0C1",
+        "cal_overdue": "#ED8377",
+        "cal_done_bg": "#243331",
+        "cal_done_text": "#748A84",
+        "cal_weekend_bg": "#1B2B29",
+        "holiday_bg": "#42302E",
     },
 }
 
@@ -77,9 +77,16 @@ QPushButton {{
     border: 1px solid {border};
     border-radius: 6px;
     padding: 6px 13px;
+    outline: none;
 }}
 QPushButton:hover {{ background: {hover}; }}
-QPushButton:checked {{ background: {accent_soft}; border-color: {accent}; color: {accent}; }}
+QPushButton:focus {{ border: 1px solid {accent}; }}
+QPushButton:checked {{
+    background: {accent_soft};
+    border: 1px solid {accent};
+    color: {accent};
+    font-weight: 700;
+}}
 QPushButton#primaryButton {{
     background: {accent};
     color: #FFFFFF;
@@ -92,14 +99,31 @@ QPushButton#quietButton {{
 }}
 QLineEdit, QComboBox, QDateEdit, QTextEdit, QSpinBox {{
     background: {base}; border: 1px solid {border};
-    border-radius: 6px; padding: 4px 7px; }}
+    border-radius: 6px; padding: 4px 7px; outline: none; }}
+QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QTextEdit:focus, QSpinBox:focus {{
+    border: 1px solid {accent};
+    background: {base};
+}}
 QTableWidget {{ background: {base}; gridline-color: {cal_grid};
-    border: 1px solid {border}; }}
+    border: 1px solid {border};
+    selection-background-color: {accent_soft};
+    selection-color: {text};
+    outline: none; }}
+QTableWidget::item:selected {{
+    background: {accent_soft};
+    color: {text};
+}}
 QHeaderView::section {{ background: {window}; color: {muted};
     border: none; border-bottom: 1px solid {border}; padding: 4px; }}
-QCheckBox {{ spacing: 6px; }}
+QCheckBox {{ spacing: 6px; outline: none; }}
 QListWidget {{ background: {base}; border: 1px solid {border};
-    border-radius: 6px; }}
+    border-radius: 6px; outline: none;
+    selection-background-color: {accent_soft};
+    selection-color: {text}; }}
+QListWidget::item:selected {{
+    background: {accent_soft};
+    color: {text};
+}}
 QLabel#mutedLabel {{ color: {muted}; }}
 QWidget#sidePanel QLabel#mutedLabel {{
     color: {sidebar_muted};
@@ -108,9 +132,12 @@ QWidget#sidePanel QLabel#mutedLabel {{
 }}
 QWidget#sidePanel QCheckBox {{ color: {sidebar_text}; }}
 QWidget#sidePanel QPushButton {{
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.10);
     color: {sidebar_text};
-    border-color: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.20);
+}}
+QWidget#sidePanel QPushButton:focus {{
+    border-color: {accent};
 }}
 """
 

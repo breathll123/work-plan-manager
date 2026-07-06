@@ -17,8 +17,9 @@ python3 -m venv .venv
 
 PyInstaller 不支持跨平台打包,必须在 Windows 上执行(二选一):
 
-1. 本机打包:把仓库拷到 Windows 电脑,双击 `build.bat`,
-   产物在 `dist\工作计划.exe`。
+1. 本机打包:把仓库拷到 Windows 电脑,在命令提示符里运行 `build.bat`,
+   产物在 `dist\WorkPlan.exe`。为了避免 Windows 批处理编码问题,
+   打包脚本和 exe 文件名默认使用英文;打包完成后可以手动重命名。
 2. GitHub Actions:推送 `v*` tag(或手动触发 workflow),
    在 Actions 页面下载 artifact「工作计划-windows-exe」。
 
@@ -26,6 +27,13 @@ PyInstaller 不支持跨平台打包,必须在 Windows 上执行(二选一):
 不要把 exe 放进 `Program Files`(目录不可写会拒绝启动并提示)。
 
 可选:仓库根目录放一个 `app.ico`,build.bat 会自动作为程序图标。
+
+推荐从命令提示符运行,这样失败时能看到完整错误:
+
+```bat
+cd /d D:\工作计划Windows
+build.bat
+```
 
 ## 冒烟测试清单(打包后在 Windows 上过一遍)
 

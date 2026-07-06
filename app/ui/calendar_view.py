@@ -10,17 +10,18 @@ from PySide6.QtWidgets import QWidget
 
 from app.data.models import STATUS_DONE
 from app.services.category_service import CategoryService, text_color_for
+from app.services.china_holidays import china_mainland_holiday
 from app.services.plan_service import PlanService, month_grid_range
 from app.services.settings_service import get_theme
 from app.ui.theme import colors
 
-HEADER_H = 26
-DAY_NUM_H = 18
+HEADER_H = 32
+DAY_NUM_H = 28
 BAR_H = 17
 BAR_GAP = 2
 MAX_LANES = 3
 UNCAT_COLOR = "#888888"
-WEEKDAYS = "一二三四五六日"
+WEEKDAYS = ("周一", "周二", "周三", "周四", "周五", "周六", "周日")
 
 
 class CalendarView(QWidget):
@@ -75,6 +76,9 @@ class CalendarView(QWidget):
         cell_h = (self.height() - HEADER_H) / rows
         self._plan_hits = []
         self._day_cells = []
+        header_font = painter.font()
+        header_font.setBold(True)
+        painter.setFont(header_font)
         painter.setPen(QColor(c["muted"]))
         for i, name in enumerate(WEEKDAYS):
             painter.drawText(
@@ -82,6 +86,8 @@ class CalendarView(QWidget):
                 Qt.AlignCenter,
                 name,
             )
+        header_font.setBold(False)
+        painter.setFont(header_font)
         for wi, week in enumerate(self._weeks):
             y = int(HEADER_H + wi * cell_h)
             for di, day in enumerate(week):
@@ -103,6 +109,17 @@ class CalendarView(QWidget):
                     Qt.AlignRight | Qt.AlignTop,
                     str(day.day),
                 )
+                holiday = china_mainland_holiday(day)
+                if holiday is not None:
+                    label_rect = QRect(x + 5, y + 5, int(cell_w) - 36, 18)
+                    painter.setPen(QColor(c["cal_overdue"]))
+                    painter.drawText(
+                        label_rect,
+                        Qt.AlignLeft | Qt.AlignVCenter,
+                        painter.fontMetrics().elidedText(
+                            holiday.name, Qt.ElideRight, label_rect.width()
+                        ),
+                    )
             self._draw_week_bars(painter, c, week, wi, cell_w, cell_h, today)
         painter.end()
 

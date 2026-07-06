@@ -50,7 +50,9 @@ class MainWindow(QMainWindow):
         self.btn_next = QPushButton("▶")
         self.btn_today = QPushButton("今天")
         self.month_label = QLabel()
-        self.month_label.setStyleSheet("font-weight: bold; padding: 0 8px;")
+        self.month_label.setStyleSheet(
+            "font-size: 20px; font-weight: bold; padding: 0 12px;"
+        )
         self.btn_cal = QPushButton("月历")
         self.btn_list = QPushButton("列表")
         for b in (self.btn_cal, self.btn_list):

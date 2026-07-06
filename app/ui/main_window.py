@@ -46,19 +46,21 @@ class MainWindow(QMainWindow):
         self.toolbar = QToolBar()
         self.toolbar.setMovable(False)
         self.addToolBar(self.toolbar)
-        self.btn_prev = QPushButton("◀")
-        self.btn_next = QPushButton("▶")
+        self.btn_prev = QPushButton("‹")
+        self.btn_next = QPushButton("›")
+        for b in (self.btn_prev, self.btn_next):
+            b.setObjectName("navButton")
         self.btn_today = QPushButton("今天")
+        self.btn_today.setObjectName("subtleButton")
         self.month_label = QLabel()
-        self.month_label.setStyleSheet(
-            "font-size: 24px; font-weight: 800; padding: 0 16px;"
-        )
+        self.month_label.setObjectName("monthTitle")
         self.btn_cal = QPushButton("月历")
         self.btn_list = QPushButton("列表")
         for b in (self.btn_cal, self.btn_list):
             b.setCheckable(True)
+            b.setObjectName("segmentButton")
         self.btn_cal.setChecked(True)
-        self.btn_new = QPushButton("+ 新建")
+        self.btn_new = QPushButton("新建计划")
         self.btn_new.setObjectName("primaryButton")
         self.btn_theme = QPushButton()
         self.btn_theme.setObjectName("quietButton")
@@ -100,6 +102,7 @@ class MainWindow(QMainWindow):
         self.side_layout.addLayout(self.cat_box_container)
         self.side_layout.addStretch()
         self.btn_manage_cats = QPushButton("管理分类")
+        self.btn_manage_cats.setObjectName("sidebarButton")
         self.side_layout.addWidget(self.btn_manage_cats)
         self.view_stack = QStackedWidget()
         from app.ui.calendar_view import CalendarView
@@ -160,6 +163,7 @@ class MainWindow(QMainWindow):
         entries.append((UNCATEGORIZED, "未分类", "#888888"))
         for cid, name, color in entries:
             box = QCheckBox(name)
+            box.setObjectName("categoryChip")
             box.setProperty("cat_id", cid)
             box.setChecked(checked.get(cid, True))
             box.setStyleSheet(

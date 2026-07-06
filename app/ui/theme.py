@@ -5,7 +5,8 @@ from PySide6.QtWidgets import QApplication
 
 COLORS = {
     "light": {
-        "window": "#EAF1EC",
+        "window": "#F3F6F2",
+        "surface": "#FFFFFF",
         "base": "#FBFEFA",
         "paper": "#F7FBF4",
         "paper_alt": "#EEF7EF",
@@ -14,9 +15,12 @@ COLORS = {
         "sidebar_muted": "#BFD6CA",
         "text": "#21312D",
         "muted": "#6B7D74",
-        "border": "#C7DAD0",
+        "border": "#D5E1DA",
+        "border_strong": "#AFC8BC",
         "accent": "#167168",
+        "accent_deep": "#0D5A55",
         "accent_soft": "#DCEFEB",
+        "accent_faint": "#F0F8F5",
         "hover": "#EEF7F3",
         "sel_bg": "#DCEFEB",
         "cal_grid": "#CBDED3",
@@ -30,9 +34,13 @@ COLORS = {
         "holiday_text": "#B6473B",
         "solar_term_bg": "#DDEFE8",
         "solar_term_text": "#12675F",
+        "danger": "#C65345",
+        "danger_soft": "#F8E5E1",
+        "warning": "#BA7517",
     },
     "dark": {
         "window": "#111B1B",
+        "surface": "#182625",
         "base": "#1B2928",
         "paper": "#172423",
         "paper_alt": "#1D302E",
@@ -42,8 +50,11 @@ COLORS = {
         "text": "#EAF4EF",
         "muted": "#9DB5AC",
         "border": "#2F4B47",
+        "border_strong": "#4C7069",
         "accent": "#73D0C1",
+        "accent_deep": "#9BE4D8",
         "accent_soft": "#1F3D39",
+        "accent_faint": "#182F2C",
         "hover": "#223532",
         "sel_bg": "#1F3D39",
         "cal_grid": "#31504B",
@@ -57,6 +68,9 @@ COLORS = {
         "holiday_text": "#F09A90",
         "solar_term_bg": "#203D38",
         "solar_term_text": "#8FE0D1",
+        "danger": "#ED8377",
+        "danger_soft": "#3B2523",
+        "warning": "#E0A34C",
     },
 }
 
@@ -74,18 +88,28 @@ QWidget#sidePanel {{
 }}
 QToolBar {{
     background: {window};
-    border-bottom: 1px solid {border};
+    border: none;
     spacing: 8px;
-    padding: 8px 10px;
+    padding: 12px 14px;
+}}
+QLabel#monthTitle {{
+    color: {text};
+    font-size: 26px;
+    font-weight: 800;
+    padding: 0 14px;
 }}
 QPushButton {{
-    background: {base};
+    background: {surface};
     border: 1px solid {border};
-    border-radius: 6px;
-    padding: 6px 13px;
+    border-radius: 10px;
+    padding: 7px 14px;
+    min-height: 28px;
     outline: none;
 }}
-QPushButton:hover {{ background: {hover}; }}
+QPushButton:hover {{
+    background: {hover};
+    border-color: {border_strong};
+}}
 QPushButton:focus {{ border: 1px solid {accent}; }}
 QPushButton:checked {{
     background: {accent_soft};
@@ -99,23 +123,133 @@ QPushButton#primaryButton {{
     border-color: {accent};
     font-weight: 700;
 }}
+QPushButton#primaryButton:hover {{
+    background: {accent_deep};
+    border-color: {accent_deep};
+}}
 QPushButton#quietButton {{
     background: transparent;
     color: {muted};
+    border-color: transparent;
+}}
+QPushButton#subtleButton {{
+    background: {accent_faint};
+    color: {accent_deep};
+    border-color: transparent;
+    font-weight: 700;
+}}
+QPushButton#dangerButton {{
+    background: {danger_soft};
+    color: {danger};
+    border-color: transparent;
+    font-weight: 700;
+}}
+QPushButton#navButton {{
+    min-width: 34px;
+    max-width: 34px;
+    min-height: 34px;
+    max-height: 34px;
+    border-radius: 17px;
+    padding: 0;
+    font-size: 22px;
+    font-weight: 600;
+}}
+QPushButton#segmentButton {{
+    background: transparent;
+    border-color: transparent;
+    border-radius: 10px;
+    color: {muted};
+    font-weight: 700;
+    padding: 7px 16px;
+}}
+QPushButton#segmentButton:hover {{
+    background: {hover};
+    color: {text};
+}}
+QPushButton#segmentButton:checked {{
+    background: {accent};
+    border-color: {accent};
+    color: #FFFFFF;
+}}
+QPushButton#statusPill {{
+    background: {accent_faint};
+    border-color: transparent;
+    color: {muted};
+    border-radius: 12px;
+    padding: 7px 14px;
+    font-weight: 700;
+}}
+QPushButton#statusPill:checked {{
+    background: {accent};
+    border-color: {accent};
+    color: #FFFFFF;
+}}
+QPushButton#sidebarButton {{
+    background: rgba(255, 255, 255, 0.12);
+    color: {sidebar_text};
+    border-color: rgba(255, 255, 255, 0.18);
+    font-weight: 700;
+}}
+QWidget#filterBar {{
+    background: {surface};
+    border: 1px solid {border};
+    border-radius: 12px;
+}}
+QLabel#fieldLabel {{
+    color: {muted};
+    font-size: 12px;
+    font-weight: 800;
+    padding-left: 2px;
 }}
 QLineEdit, QComboBox, QDateEdit, QTextEdit, QSpinBox {{
-    background: {base}; border: 1px solid {border};
-    border-radius: 6px; padding: 4px 7px; outline: none; }}
+    background: {surface};
+    border: 1px solid {border};
+    border-radius: 10px;
+    padding: 6px 10px;
+    min-height: 26px;
+    selection-background-color: {accent_soft};
+    selection-color: {text};
+    outline: none;
+}}
 QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QTextEdit:focus, QSpinBox:focus {{
     border: 1px solid {accent};
-    background: {base};
+    background: {surface};
+}}
+QComboBox {{
+    padding-right: 30px;
+}}
+QComboBox::drop-down {{
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 28px;
+    border-left: 1px solid {border};
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background: {accent_faint};
+}}
+QComboBox::down-arrow {{
+    image: none;
+    width: 0;
+    height: 0;
+}}
+QComboBox QAbstractItemView {{
+    background: {surface};
+    color: {text};
+    border: 1px solid {border};
+    border-radius: 10px;
+    padding: 4px;
+    outline: none;
+    selection-background-color: {accent_soft};
+    selection-color: {text};
 }}
 QDateEdit::drop-down {{
-    width: 22px;
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 28px;
     border-left: 1px solid {border};
-    border-top-right-radius: 6px;
-    border-bottom-right-radius: 6px;
-    background: {accent_soft};
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background: {accent_faint};
 }}
 QDateEdit::down-arrow {{
     image: none;
@@ -123,53 +257,126 @@ QDateEdit::down-arrow {{
     height: 0;
 }}
 QCalendarWidget QWidget {{
+    background: {surface};
     alternate-background-color: {paper_alt};
 }}
+QCalendarWidget QWidget#qt_calendar_navigationbar {{
+    background: {surface};
+    border: none;
+}}
 QCalendarWidget QToolButton {{
-    background: {accent_soft};
-    color: {accent};
-    border: 1px solid {border};
-    border-radius: 6px;
-    margin: 2px;
-    padding: 4px 8px;
+    background: {accent_faint};
+    color: {accent_deep};
+    border: 1px solid transparent;
+    border-radius: 9px;
+    margin: 4px 2px;
+    padding: 5px 10px;
+    font-weight: 800;
     outline: none;
 }}
 QCalendarWidget QToolButton:hover {{
     background: {hover};
+    border-color: {border_strong};
 }}
 QCalendarWidget QMenu {{
-    background: {base};
+    background: {surface};
     border: 1px solid {border};
+    border-radius: 8px;
 }}
 QCalendarWidget QSpinBox {{
-    background: {base};
+    background: {surface};
     border: 1px solid {border};
-    border-radius: 6px;
-    padding: 3px 5px;
+    border-radius: 8px;
+    padding: 4px 7px;
 }}
 QCalendarWidget QAbstractItemView {{
-    background: {base};
+    background: {surface};
     color: {text};
+    selection-background-color: {accent_soft};
+    selection-color: {text};
+    border: none;
+    outline: none;
+}}
+QCalendarWidget QAbstractItemView::item:hover {{
+    background: {hover};
+}}
+QCalendarWidget QAbstractItemView::item:selected {{
+    background: {accent};
+    color: #FFFFFF;
+    border: none;
+    outline: none;
+}}
+QTableWidget {{
+    background: {surface};
+    alternate-background-color: {paper_alt};
+    gridline-color: transparent;
+    border: 1px solid {border};
+    border-radius: 12px;
     selection-background-color: {accent_soft};
     selection-color: {text};
     outline: none;
 }}
-QTableWidget {{ background: {base}; gridline-color: {cal_grid};
-    border: 1px solid {border};
-    selection-background-color: {accent_soft};
-    selection-color: {text};
-    outline: none; }}
 QTableWidget::item:selected {{
     background: {accent_soft};
     color: {text};
 }}
-QHeaderView::section {{ background: {window}; color: {muted};
-    border: none; border-bottom: 1px solid {border}; padding: 4px; }}
-QCheckBox {{ spacing: 6px; outline: none; }}
-QListWidget {{ background: {base}; border: 1px solid {border};
-    border-radius: 6px; outline: none;
+QHeaderView::section {{
+    background: {surface};
+    color: {muted};
+    border: none;
+    border-bottom: 1px solid {border};
+    padding: 8px 6px;
+    font-weight: 800;
+}}
+QCheckBox {{
+    spacing: 7px;
+    outline: none;
+}}
+QCheckBox::indicator {{
+    width: 15px;
+    height: 15px;
+    border: 1px solid {border_strong};
+    border-radius: 5px;
+    background: {surface};
+}}
+QCheckBox::indicator:checked {{
+    background: {accent};
+    border-color: {accent};
+}}
+QCheckBox#dateFilterPill {{
+    background: {accent_faint};
+    border: 1px solid transparent;
+    border-radius: 12px;
+    color: {muted};
+    padding: 7px 12px;
+    font-weight: 700;
+}}
+QCheckBox#dateFilterPill:checked {{
+    background: {accent_soft};
+    color: {accent_deep};
+    border-color: {accent};
+}}
+QCheckBox#dateFilterPill::indicator {{
+    width: 0;
+    height: 0;
+    border: none;
+}}
+QListWidget {{
+    background: {surface};
+    border: 1px solid {border};
+    border-radius: 12px;
+    padding: 4px;
+    outline: none;
     selection-background-color: {accent_soft};
-    selection-color: {text}; }}
+    selection-color: {text};
+}}
+QListWidget::item {{
+    border-radius: 8px;
+    padding: 6px 8px;
+}}
+QListWidget::item:hover {{
+    background: {hover};
+}}
 QListWidget::item:selected {{
     background: {accent_soft};
     color: {text};
@@ -180,7 +387,10 @@ QWidget#sidePanel QLabel#mutedLabel {{
     font-weight: 700;
     letter-spacing: 1px;
 }}
-QWidget#sidePanel QCheckBox {{ color: {sidebar_text}; }}
+QWidget#sidePanel QCheckBox {{
+    color: {sidebar_text};
+    padding: 5px 2px;
+}}
 QWidget#sidePanel QPushButton {{
     background: rgba(255, 255, 255, 0.10);
     color: {sidebar_text};

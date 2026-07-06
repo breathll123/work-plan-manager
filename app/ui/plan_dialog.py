@@ -8,7 +8,6 @@ from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QButtonGroup,
     QComboBox,
-    QDateEdit,
     QDialog,
     QFileDialog,
     QFormLayout,
@@ -19,7 +18,6 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QMessageBox,
     QPushButton,
-    QRadioButton,
     QTextEdit,
     QVBoxLayout,
 )
@@ -28,6 +26,7 @@ from app import platform_utils
 from app.data.models import STATUS_NAMES
 from app.services.category_service import CategoryService
 from app.services.plan_service import PlanService
+from app.ui.widgets import ModernDateEdit
 
 
 def _to_qdate(d: date) -> QDate:
@@ -66,20 +65,22 @@ class PlanDialog(QDialog):
         for c in self.cat_svc.list_all():
             self.cat_combo.addItem(c.name, c.id)
         form.addRow("分类", self.cat_combo)
-        self.start_edit = QDateEdit(calendarPopup=True)
-        self.end_edit = QDateEdit(calendarPopup=True)
-        for edit in (self.start_edit, self.end_edit):
-            edit.setDisplayFormat("yyyy-MM-dd")
-            edit.calendarWidget().setGridVisible(False)
+        self.start_edit = ModernDateEdit()
+        self.end_edit = ModernDateEdit()
         dates = QHBoxLayout()
+        dates.setSpacing(8)
         dates.addWidget(self.start_edit)
         dates.addWidget(QLabel("至"))
         dates.addWidget(self.end_edit)
         form.addRow("日期", dates)
         self.status_group = QButtonGroup(self)
+        self.status_group.setExclusive(True)
         status_row = QHBoxLayout()
+        status_row.setSpacing(6)
         for value, name in STATUS_NAMES.items():
-            rb = QRadioButton(name)
+            rb = QPushButton(name)
+            rb.setCheckable(True)
+            rb.setObjectName("statusPill")
             self.status_group.addButton(rb, value)
             status_row.addWidget(rb)
         self.status_group.button(0).setChecked(True)
@@ -104,13 +105,16 @@ class PlanDialog(QDialog):
         layout.addLayout(btns)
         footer = QHBoxLayout()
         self.btn_delete = QPushButton("删除计划")
+        self.btn_delete.setObjectName("dangerButton")
         self.btn_delete.clicked.connect(self._delete)
         self.btn_delete.setVisible(self.plan_id is not None)
         footer.addWidget(self.btn_delete)
         footer.addStretch()
         cancel = QPushButton("取消")
+        cancel.setObjectName("quietButton")
         cancel.clicked.connect(self.reject)
         save = QPushButton("保存")
+        save.setObjectName("primaryButton")
         save.setDefault(True)
         save.clicked.connect(self._save)
         footer.addWidget(cancel)

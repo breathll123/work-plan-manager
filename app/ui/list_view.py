@@ -9,7 +9,6 @@ from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
-    QDateEdit,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -22,6 +21,7 @@ from PySide6.QtWidgets import (
 from app.data.models import STATUS_DONE, STATUS_NAMES
 from app.services.category_service import CategoryService
 from app.services.plan_service import PlanService
+from app.ui.widgets import ModernDateEdit
 
 ALL = "ALL"
 COLUMNS = ["状态", "标题", "分类", "开始", "结束", "绑定"]
@@ -38,36 +38,49 @@ class ListView(QWidget):
         self.cat_svc = CategoryService(conn)
         self.sidebar_ids = sidebar_ids
         layout = QVBoxLayout(self)
-        bar = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(10)
+        bar_widget = QWidget()
+        bar_widget.setObjectName("filterBar")
+        bar = QHBoxLayout(bar_widget)
+        bar.setContentsMargins(12, 10, 12, 10)
+        bar.setSpacing(8)
         self.cat_combo = QComboBox()
+        self.cat_combo.setMinimumWidth(128)
         self.status_combo = QComboBox()
+        self.status_combo.setMinimumWidth(118)
         self.status_combo.addItem("全部状态", None)
         for value, name in STATUS_NAMES.items():
             self.status_combo.addItem(name, value)
         self.date_check = QCheckBox("按日期筛选")
+        self.date_check.setObjectName("dateFilterPill")
         today = date.today()
-        self.from_edit = QDateEdit(calendarPopup=True)
-        self.from_edit.setDisplayFormat("yyyy-MM-dd")
-        self.from_edit.calendarWidget().setGridVisible(False)
+        self.from_edit = ModernDateEdit()
         self.from_edit.setDate(QDate(today.year, today.month, 1))
-        self.to_edit = QDateEdit(calendarPopup=True)
-        self.to_edit.setDisplayFormat("yyyy-MM-dd")
-        self.to_edit.calendarWidget().setGridVisible(False)
+        self.to_edit = ModernDateEdit()
         self.to_edit.setDate(QDate(today.year, today.month, 1).addMonths(1).addDays(-1))
+        cat_label = QLabel("分类")
+        cat_label.setObjectName("fieldLabel")
+        status_label = QLabel("状态")
+        status_label.setObjectName("fieldLabel")
+        bar.addWidget(cat_label)
         bar.addWidget(self.cat_combo)
+        bar.addWidget(status_label)
         bar.addWidget(self.status_combo)
         bar.addWidget(self.date_check)
         bar.addWidget(self.from_edit)
         bar.addWidget(QLabel("至"))
         bar.addWidget(self.to_edit)
         bar.addStretch()
-        layout.addLayout(bar)
+        layout.addWidget(bar_widget)
         self.table = QTableWidget(0, len(COLUMNS))
         self.table.setHorizontalHeaderLabels(COLUMNS)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.verticalHeader().setVisible(False)
+        self.table.setAlternatingRowColors(True)
+        self.table.setShowGrid(False)
         layout.addWidget(self.table)
         for w in (self.cat_combo, self.status_combo):
             w.currentIndexChanged.connect(lambda _: self.refresh())

@@ -10,11 +10,7 @@ from PySide6.QtWidgets import QWidget
 
 from app.data.models import STATUS_DONE
 from app.services.category_service import CategoryService, text_color_for
-from app.services.china_holidays import (
-    china_mainland_holiday,
-    holiday_reminder_for,
-    next_holiday_reminder_on_or_after,
-)
+from app.services.system_reminders import SystemReminder, system_reminders_for_day
 from app.services.plan_service import PlanService, month_grid_range
 from app.services.settings_service import get_theme
 from app.ui.theme import colors
@@ -80,7 +76,6 @@ class CalendarView(QWidget):
         painter.setPen(QColor(c["border"]))
         painter.setBrush(QColor(c["paper"]))
         painter.drawRoundedRect(page, 10, 10)
-        self._draw_next_holiday_notice(painter, c, page, today)
         cell_w = page.width() / 7
         rows = max(len(self._weeks), 1)
         cell_h = (page.height() - HEADER_H) / rows
@@ -139,18 +134,19 @@ class CalendarView(QWidget):
                     Qt.AlignRight | Qt.AlignTop,
                     str(day.day),
                 )
-                holiday = china_mainland_holiday(day)
-                if holiday is not None:
+                reminders = system_reminders_for_day(day)
+                if reminders:
                     label_rect = QRect(x + 6, y + 6, int(cell_w) - 42, 18)
                     painter.setPen(Qt.NoPen)
                     painter.setBrush(QColor(c["holiday_bg"]))
                     painter.drawRoundedRect(label_rect, 7, 7)
                     painter.setPen(QColor(c["cal_overdue"]))
+                    label = " / ".join(r.name for r in reminders)
                     painter.drawText(
                         label_rect.adjusted(6, 0, -6, 0),
                         Qt.AlignCenter,
                         painter.fontMetrics().elidedText(
-                            holiday.name, Qt.ElideRight, label_rect.width()
+                            label, Qt.ElideRight, label_rect.width()
                         ),
                     )
             self._draw_week_bars(
@@ -171,31 +167,26 @@ class CalendarView(QWidget):
             key=lambda p: (p.start_date, p.id),
         )
         lanes: list[list[tuple[int, int]]] = []
-        holiday_spans = self._holiday_spans(week)
-        if holiday_spans:
-            lanes.append([])
-            for c0, c1, name in holiday_spans:
-                lanes[0].append((c0, c1))
-                self._draw_holiday_bar(
-                    painter, c, wi, left, grid_top, cell_w, cell_h, c0, c1, name
-                )
+        system_spans = self._system_reminder_spans(week)
         overflow = [0] * 7
+        for c0, c1, reminder in system_spans:
+            lane = self._reserve_lane(lanes, c0, c1)
+            if lane is None:
+                for col in range(c0, c1 + 1):
+                    overflow[col] += 1
+                continue
+            self._draw_system_reminder_bar(
+                painter, c, wi, left, grid_top, cell_w, cell_h,
+                c0, c1, lane, reminder,
+            )
         for plan in wplans:
             c0 = max((plan.start_date - week_start).days, 0)
             c1 = min((plan.end_date - week_start).days, 6)
-            lane = None
-            for li, spans in enumerate(lanes):
-                if all(c1 < a or b < c0 for a, b in spans):
-                    lane = li
-                    break
+            lane = self._reserve_lane(lanes, c0, c1)
             if lane is None:
-                if len(lanes) >= MAX_LANES:
-                    for col in range(c0, c1 + 1):
-                        overflow[col] += 1
-                    continue
-                lanes.append([])
-                lane = len(lanes) - 1
-            lanes[lane].append((c0, c1))
+                for col in range(c0, c1 + 1):
+                    overflow[col] += 1
+                continue
             y = int(grid_top + wi * cell_h + DAY_NUM_H + 6 + lane * (BAR_H + BAR_GAP))
             x = int(left + c0 * cell_w) + 4
             w = int((c1 - c0 + 1) * cell_w) - 6
@@ -240,29 +231,46 @@ class CalendarView(QWidget):
                     f"+{n} 更多",
                 )
 
-    def _holiday_spans(self, week: list[date]) -> list[tuple[int, int, str]]:
-        spans: list[tuple[int, int, str]] = []
+    def _system_reminder_spans(
+        self, week: list[date]
+    ) -> list[tuple[int, int, SystemReminder]]:
+        spans: list[tuple[int, int, SystemReminder]] = []
+        seen: set[tuple[int, str]] = set()
         i = 0
         while i < len(week):
-            holiday = holiday_reminder_for(week[i])
-            if holiday is None:
-                i += 1
-                continue
-            start = i
-            name = holiday.name
-            while i + 1 < len(week):
-                next_holiday = holiday_reminder_for(week[i + 1])
-                if next_holiday is None or next_holiday.name != name:
-                    break
-                i += 1
-            spans.append((start, i, name))
+            for reminder in system_reminders_for_day(week[i]):
+                key = (i, reminder.title)
+                if key in seen:
+                    continue
+                start = i
+                end = i
+                while end + 1 < len(week):
+                    next_reminders = system_reminders_for_day(week[end + 1])
+                    if not any(r.title == reminder.title for r in next_reminders):
+                        break
+                    end += 1
+                    seen.add((end, reminder.title))
+                spans.append((start, end, reminder))
             i += 1
         return spans
 
-    def _draw_holiday_bar(
-        self, painter, c, wi, left, grid_top, cell_w, cell_h, c0, c1, name
+    def _reserve_lane(
+        self, lanes: list[list[tuple[int, int]]], c0: int, c1: int
+    ) -> int | None:
+        for li, spans in enumerate(lanes):
+            if all(c1 < a or b < c0 for a, b in spans):
+                spans.append((c0, c1))
+                return li
+        if len(lanes) >= MAX_LANES:
+            return None
+        lanes.append([(c0, c1)])
+        return len(lanes) - 1
+
+    def _draw_system_reminder_bar(
+        self, painter, c, wi, left, grid_top, cell_w, cell_h,
+        c0, c1, lane, reminder,
     ) -> None:
-        y = int(grid_top + wi * cell_h + DAY_NUM_H + 6)
+        y = int(grid_top + wi * cell_h + DAY_NUM_H + 6 + lane * (BAR_H + BAR_GAP))
         x = int(left + c0 * cell_w) + 4
         w = int((c1 - c0 + 1) * cell_w) - 6
         rect = QRect(x, y, w, BAR_H)
@@ -275,30 +283,9 @@ class CalendarView(QWidget):
             text_rect,
             Qt.AlignVCenter | Qt.AlignLeft,
             painter.fontMetrics().elidedText(
-                f"节假日 · {name}", Qt.ElideRight, text_rect.width()
+                reminder.title, Qt.ElideRight, text_rect.width()
             ),
         )
-
-    def _draw_next_holiday_notice(self, painter, c, page: QRect, today: date) -> None:
-        upcoming = next_holiday_reminder_on_or_after(today)
-        if upcoming is None:
-            return
-        year, month = self.current_month()
-        visible_month_has_holiday = any(
-            china_mainland_holiday(day) is not None
-            for week in self._weeks
-            for day in week
-            if day.year == year and day.month == month
-        )
-        if visible_month_has_holiday:
-            return
-        text = f"下个节假日提醒 · {upcoming.name} {upcoming.day.isoformat()} 08:00"
-        width = min(max(painter.fontMetrics().horizontalAdvance(text) + 28, 260), 430)
-        rect = QRect(page.right() - width - 12, page.top() + 8, width, 24)
-        painter.setPen(QColor(c["cal_overdue"]))
-        painter.setBrush(QColor(c["holiday_bg"]))
-        painter.drawRoundedRect(rect, 10, 10)
-        painter.drawText(rect.adjusted(12, 0, -12, 0), Qt.AlignCenter, text)
 
     def _hit_plan(self, pos) -> int | None:
         for rect, plan_id in self._plan_hits:

@@ -6,7 +6,7 @@ from datetime import date
 THEME_KEY = "theme"
 THEME_LIGHT = "light"
 THEME_DARK = "dark"
-HOLIDAY_REMINDER_PREFIX = "holiday_reminder_shown:"
+SYSTEM_REMINDER_PREFIX = "system_reminder_shown:"
 
 
 def get_setting(conn: sqlite3.Connection, key: str, default: str) -> str:
@@ -33,15 +33,13 @@ def set_theme(conn: sqlite3.Connection, name: str) -> None:
     set_setting(conn, THEME_KEY, name)
 
 
-def _holiday_reminder_key(day: date) -> str:
-    return f"{HOLIDAY_REMINDER_PREFIX}{day.isoformat()}"
+def _system_reminder_key(day: date) -> str:
+    return f"{SYSTEM_REMINDER_PREFIX}{day.isoformat()}"
 
 
-def has_holiday_reminder_been_shown(
-    conn: sqlite3.Connection, day: date
-) -> bool:
-    return get_setting(conn, _holiday_reminder_key(day), "0") == "1"
+def has_system_reminder_been_shown(conn: sqlite3.Connection, day: date) -> bool:
+    return get_setting(conn, _system_reminder_key(day), "0") == "1"
 
 
-def mark_holiday_reminder_shown(conn: sqlite3.Connection, day: date) -> None:
-    set_setting(conn, _holiday_reminder_key(day), "1")
+def mark_system_reminder_shown(conn: sqlite3.Connection, day: date) -> None:
+    set_setting(conn, _system_reminder_key(day), "1")

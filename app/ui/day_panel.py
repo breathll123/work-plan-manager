@@ -14,8 +14,8 @@ from PySide6.QtWidgets import (
 )
 
 from app.data.models import STATUS_NAMES
-from app.services.china_holidays import holiday_reminder_for
 from app.services.plan_service import PlanService
+from app.services.system_reminders import system_reminders_for_day
 
 
 class DayPanel(QDialog):
@@ -46,14 +46,14 @@ class DayPanel(QDialog):
 
     def reload(self) -> None:
         self.listw.clear()
-        holiday = holiday_reminder_for(self.day)
-        if holiday is not None:
-            item = QListWidgetItem(f"[系统提醒] {holiday.title}")
+        system_reminders = system_reminders_for_day(self.day)
+        for reminder in system_reminders:
+            item = QListWidgetItem(f"[系统提醒] {reminder.title}")
             item.setFlags(Qt.ItemIsEnabled)
             item.setData(Qt.UserRole, None)
             self.listw.addItem(item)
         plans = self.svc.plans.list_overlapping(self.day, self.day)
-        if not plans and holiday is None:
+        if not plans and not system_reminders:
             self.listw.addItem("这一天还没有计划")
             return
         for p in plans:

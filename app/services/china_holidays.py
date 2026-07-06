@@ -62,15 +62,3 @@ def holiday_reminder_for(day: date) -> HolidayReminder | None:
 def holiday_reminders_for_day(day: date) -> list[HolidayReminder]:
     reminder = holiday_reminder_for(day)
     return [reminder] if reminder is not None else []
-
-
-def next_holiday_reminder_on_or_after(day: date) -> HolidayReminder | None:
-    future_days = sorted(
-        holiday_day
-        for holiday_year in CHINA_MAINLAND_HOLIDAYS.values()
-        for holiday_day in holiday_year
-        if holiday_day >= day
-    )
-    if not future_days:
-        return None
-    return holiday_reminder_for(future_days[0])

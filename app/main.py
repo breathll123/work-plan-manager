@@ -8,13 +8,13 @@ from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from app.data.db import app_dir, backup, connect, default_db_path, is_dir_writable
-from app.services.china_holidays import holiday_reminders_for_day
 from app.services.reminder_service import get_reminders
 from app.services.settings_service import (
     get_theme,
-    has_holiday_reminder_been_shown,
-    mark_holiday_reminder_shown,
+    has_system_reminder_been_shown,
+    mark_system_reminder_shown,
 )
+from app.services.system_reminders import system_reminders_for_day
 from app.ui.main_window import MainWindow
 from app.ui.reminder_dialog import ReminderDialog
 from app.ui.theme import apply_theme
@@ -39,14 +39,14 @@ def _install_excepthook() -> None:
 
 
 def _show_holiday_reminder(conn, win, today: date) -> None:
-    holiday_reminders = holiday_reminders_for_day(today)
-    if not holiday_reminders:
+    system_reminders = system_reminders_for_day(today)
+    if not system_reminders:
         return
-    if has_holiday_reminder_been_shown(conn, today):
+    if has_system_reminder_been_shown(conn, today):
         return
-    dlg = ReminderDialog(conn, [], [], holiday_reminders=holiday_reminders, parent=win)
+    dlg = ReminderDialog(conn, [], [], system_reminders=system_reminders, parent=win)
     dlg.exec()
-    mark_holiday_reminder_shown(conn, today)
+    mark_system_reminder_shown(conn, today)
 
 
 def _run_holiday_reminder_check(conn, win) -> None:
@@ -68,7 +68,7 @@ def _schedule_holiday_reminder(conn, win) -> None:
     today = date.today()
     now = datetime.now()
     remind_at = datetime.combine(today, time(hour=8))
-    if now >= remind_at and holiday_reminders_for_day(today):
+    if now >= remind_at and system_reminders_for_day(today):
         QTimer.singleShot(0, lambda: _show_holiday_reminder(conn, win, today))
     _schedule_next_holiday_reminder_check(conn, win)
 

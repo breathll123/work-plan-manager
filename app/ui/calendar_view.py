@@ -12,6 +12,11 @@ from app.data.models import STATUS_DONE
 from app.services.category_service import CategoryService, text_color_for
 from app.services.plan_service import PlanService, month_grid_range
 from app.services.settings_service import get_theme
+from app.services.system_reminders import (
+    SystemReminder,
+    system_reminder_kind,
+    system_reminders_for_day,
+)
 from app.ui.theme import colors
 
 OUTER_PAD = 14
@@ -133,6 +138,7 @@ class CalendarView(QWidget):
                     Qt.AlignRight | Qt.AlignTop,
                     str(day.day),
                 )
+                self._draw_system_marker(painter, c, day, x, y, int(cell_w))
             self._draw_week_bars(
                 painter, c, week, wi, left, grid_top, cell_w, cell_h, today
             )
@@ -215,6 +221,43 @@ class CalendarView(QWidget):
             return None
         lanes.append([(c0, c1)])
         return len(lanes) - 1
+
+    def _draw_system_marker(
+        self,
+        painter: QPainter,
+        c: dict[str, str],
+        day: date,
+        x: int,
+        y: int,
+        cell_w: int,
+    ) -> None:
+        reminders = system_reminders_for_day(day)
+        if not reminders:
+            return
+
+        kind = self._dominant_reminder_kind(reminders)
+        label_rect = QRect(x + 6, y + 7, max(cell_w - 46, 24), 18)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(QColor(self._reminder_bg(c, kind)))
+        painter.drawRoundedRect(label_rect, 7, 7)
+        painter.setPen(QColor(self._reminder_text(c, kind)))
+        label = " / ".join(r.name for r in reminders)
+        painter.drawText(
+            label_rect.adjusted(6, 0, -6, 0),
+            Qt.AlignCenter,
+            painter.fontMetrics().elidedText(label, Qt.ElideRight, label_rect.width()),
+        )
+
+    def _dominant_reminder_kind(self, reminders: list[SystemReminder]) -> str:
+        if any(system_reminder_kind(r) == "holiday" for r in reminders):
+            return "holiday"
+        return "solar_term"
+
+    def _reminder_bg(self, c: dict[str, str], kind: str) -> str:
+        return c["holiday_bg"] if kind == "holiday" else c["solar_term_bg"]
+
+    def _reminder_text(self, c: dict[str, str], kind: str) -> str:
+        return c["holiday_text"] if kind == "holiday" else c["solar_term_text"]
 
     def _hit_plan(self, pos) -> int | None:
         for rect, plan_id in self._plan_hits:

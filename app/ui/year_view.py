@@ -135,6 +135,7 @@ class YearView(QWidget):
 
         painter.setPen(QColor(c["muted"]))
         for i, name in enumerate(WEEKDAYS):
+            painter.setPen(QColor(c["cal_overdue"] if i in (0, 6) else c["muted"]))
             painter.drawText(
                 QRect(int(rect.left() + i * cell_w), header_y, int(cell_w), 18),
                 Qt.AlignCenter,
@@ -156,6 +157,11 @@ class YearView(QWidget):
             )
             self._day_cells.append((cell, day))
             in_month = day.month == month
+            is_weekend = col in (0, 6)
+            if is_weekend:
+                painter.setPen(Qt.NoPen)
+                painter.setBrush(QColor(c["cal_weekend_bg"]))
+                painter.drawRoundedRect(cell.adjusted(1, 1, -1, -1), 4, 4)
             if day == today:
                 painter.setPen(Qt.NoPen)
                 painter.setBrush(QColor(c["cal_overdue"]))

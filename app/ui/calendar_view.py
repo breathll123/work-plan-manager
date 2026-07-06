@@ -10,7 +10,11 @@ from PySide6.QtWidgets import QWidget
 
 from app.data.models import STATUS_DONE
 from app.services.category_service import CategoryService, text_color_for
-from app.services.china_holidays import china_mainland_holiday, holiday_reminder_for
+from app.services.china_holidays import (
+    china_mainland_holiday,
+    holiday_reminder_for,
+    next_holiday_reminder_on_or_after,
+)
 from app.services.plan_service import PlanService, month_grid_range
 from app.services.settings_service import get_theme
 from app.ui.theme import colors
@@ -76,6 +80,7 @@ class CalendarView(QWidget):
         painter.setPen(QColor(c["border"]))
         painter.setBrush(QColor(c["paper"]))
         painter.drawRoundedRect(page, 10, 10)
+        self._draw_next_holiday_notice(painter, c, page, today)
         cell_w = page.width() / 7
         rows = max(len(self._weeks), 1)
         cell_h = (page.height() - HEADER_H) / rows
@@ -273,6 +278,27 @@ class CalendarView(QWidget):
                 f"节假日 · {name}", Qt.ElideRight, text_rect.width()
             ),
         )
+
+    def _draw_next_holiday_notice(self, painter, c, page: QRect, today: date) -> None:
+        upcoming = next_holiday_reminder_on_or_after(today)
+        if upcoming is None:
+            return
+        year, month = self.current_month()
+        visible_month_has_holiday = any(
+            china_mainland_holiday(day) is not None
+            for week in self._weeks
+            for day in week
+            if day.year == year and day.month == month
+        )
+        if visible_month_has_holiday:
+            return
+        text = f"下个节假日提醒 · {upcoming.name} {upcoming.day.isoformat()} 08:00"
+        width = min(max(painter.fontMetrics().horizontalAdvance(text) + 28, 260), 430)
+        rect = QRect(page.right() - width - 12, page.top() + 8, width, 24)
+        painter.setPen(QColor(c["cal_overdue"]))
+        painter.setBrush(QColor(c["holiday_bg"]))
+        painter.drawRoundedRect(rect, 10, 10)
+        painter.drawText(rect.adjusted(12, 0, -12, 0), Qt.AlignCenter, text)
 
     def _hit_plan(self, pos) -> int | None:
         for rect, plan_id in self._plan_hits:

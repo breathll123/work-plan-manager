@@ -3,6 +3,7 @@ from datetime import date
 from app.services.china_holidays import (
     china_mainland_holiday,
     holiday_reminders_for_day,
+    next_holiday_reminder_on_or_after,
 )
 
 
@@ -19,3 +20,9 @@ def test_holiday_reminder_is_system_title():
     reminders = holiday_reminders_for_day(date(2026, 10, 1))
     assert len(reminders) == 1
     assert reminders[0].title == "中国大陆节假日：国庆"
+
+
+def test_next_holiday_reminder_visible_for_default_july_2026():
+    reminder = next_holiday_reminder_on_or_after(date(2026, 7, 6))
+    assert reminder.name == "中秋"
+    assert reminder.day == date(2026, 9, 25)

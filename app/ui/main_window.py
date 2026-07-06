@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
         self.btn_today = QPushButton("今天")
         self.month_label = QLabel()
         self.month_label.setStyleSheet(
-            "font-size: 20px; font-weight: bold; padding: 0 12px;"
+            "font-size: 24px; font-weight: 800; padding: 0 16px;"
         )
         self.btn_cal = QPushButton("月历")
         self.btn_list = QPushButton("列表")
@@ -59,7 +59,9 @@ class MainWindow(QMainWindow):
             b.setCheckable(True)
         self.btn_cal.setChecked(True)
         self.btn_new = QPushButton("+ 新建")
+        self.btn_new.setObjectName("primaryButton")
         self.btn_theme = QPushButton()
+        self.btn_theme.setObjectName("quietButton")
         self.toolbar.addWidget(self.btn_prev)
         self.toolbar.addWidget(self.month_label)
         self.toolbar.addWidget(self.btn_next)
@@ -81,11 +83,16 @@ class MainWindow(QMainWindow):
 
     def _build_body(self) -> None:
         root = QWidget()
+        root.setObjectName("appRoot")
         layout = QHBoxLayout(root)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(0, 0, 10, 10)
+        layout.setSpacing(10)
         side = QWidget()
-        side.setFixedWidth(170)
+        side.setObjectName("sidePanel")
+        side.setFixedWidth(190)
         self.side_layout = QVBoxLayout(side)
+        self.side_layout.setContentsMargins(16, 18, 16, 16)
+        self.side_layout.setSpacing(10)
         cap = QLabel("分类筛选")
         cap.setObjectName("mutedLabel")
         self.side_layout.addWidget(cap)

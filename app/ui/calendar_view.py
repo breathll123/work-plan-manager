@@ -15,7 +15,8 @@ from app.services.plan_service import PlanService, month_grid_range
 from app.services.settings_service import get_theme
 from app.ui.theme import colors
 
-HEADER_H = 32
+OUTER_PAD = 14
+HEADER_H = 38
 DAY_NUM_H = 28
 BAR_H = 17
 BAR_GAP = 2
@@ -71,29 +72,53 @@ class CalendarView(QWidget):
         c = colors(get_theme(self.conn))
         _, month = self.current_month()
         today = date.today()
-        cell_w = self.width() / 7
+        page = self.rect().adjusted(OUTER_PAD, OUTER_PAD, -OUTER_PAD, -OUTER_PAD)
+        painter.setPen(QColor(c["border"]))
+        painter.setBrush(QColor(c["paper"]))
+        painter.drawRoundedRect(page, 10, 10)
+        cell_w = page.width() / 7
         rows = max(len(self._weeks), 1)
-        cell_h = (self.height() - HEADER_H) / rows
+        cell_h = (page.height() - HEADER_H) / rows
+        left = page.left()
+        header_top = page.top()
+        grid_top = page.top() + HEADER_H
         self._plan_hits = []
         self._day_cells = []
         header_font = painter.font()
         header_font.setBold(True)
+        original_point_size = header_font.pointSize()
+        if original_point_size > 0:
+            header_font.setPointSize(original_point_size + 1)
         painter.setFont(header_font)
         painter.setPen(QColor(c["muted"]))
         for i, name in enumerate(WEEKDAYS):
+            if i >= 5:
+                painter.setPen(QColor(c["cal_overdue"]))
+            else:
+                painter.setPen(QColor(c["muted"]))
             painter.drawText(
-                QRect(int(i * cell_w), 0, int(cell_w), HEADER_H),
+                QRect(int(left + i * cell_w), header_top, int(cell_w), HEADER_H),
                 Qt.AlignCenter,
                 name,
             )
         header_font.setBold(False)
+        if original_point_size > 0:
+            header_font.setPointSize(original_point_size)
         painter.setFont(header_font)
         for wi, week in enumerate(self._weeks):
-            y = int(HEADER_H + wi * cell_h)
+            y = int(grid_top + wi * cell_h)
             for di, day in enumerate(week):
-                x = int(di * cell_w)
+                x = int(left + di * cell_w)
                 rect = QRect(x, y, int(cell_w), int(cell_h))
                 self._day_cells.append((rect, day))
+                if di >= 5:
+                    painter.setPen(Qt.NoPen)
+                    painter.setBrush(QColor(c["cal_weekend_bg"]))
+                    painter.drawRect(rect.adjusted(1, 1, -1, -1))
+                elif (wi + di) % 2 == 0:
+                    painter.setPen(Qt.NoPen)
+                    painter.setBrush(QColor(c["paper_alt"]))
+                    painter.drawRect(rect.adjusted(1, 1, -1, -1))
                 painter.setPen(QColor(c["cal_grid"]))
                 painter.setBrush(Qt.NoBrush)
                 painter.drawRect(rect)
@@ -111,19 +136,26 @@ class CalendarView(QWidget):
                 )
                 holiday = china_mainland_holiday(day)
                 if holiday is not None:
-                    label_rect = QRect(x + 5, y + 5, int(cell_w) - 36, 18)
+                    label_rect = QRect(x + 6, y + 6, int(cell_w) - 42, 18)
+                    painter.setPen(Qt.NoPen)
+                    painter.setBrush(QColor(c["holiday_bg"]))
+                    painter.drawRoundedRect(label_rect, 7, 7)
                     painter.setPen(QColor(c["cal_overdue"]))
                     painter.drawText(
-                        label_rect,
-                        Qt.AlignLeft | Qt.AlignVCenter,
+                        label_rect.adjusted(6, 0, -6, 0),
+                        Qt.AlignCenter,
                         painter.fontMetrics().elidedText(
                             holiday.name, Qt.ElideRight, label_rect.width()
                         ),
                     )
-            self._draw_week_bars(painter, c, week, wi, cell_w, cell_h, today)
+            self._draw_week_bars(
+                painter, c, week, wi, left, grid_top, cell_w, cell_h, today
+            )
         painter.end()
 
-    def _draw_week_bars(self, painter, c, week, wi, cell_w, cell_h, today) -> None:
+    def _draw_week_bars(
+        self, painter, c, week, wi, left, grid_top, cell_w, cell_h, today
+    ) -> None:
         week_start, week_end = week[0], week[-1]
         wplans = sorted(
             (
@@ -151,8 +183,8 @@ class CalendarView(QWidget):
                 lanes.append([])
                 lane = len(lanes) - 1
             lanes[lane].append((c0, c1))
-            y = int(HEADER_H + wi * cell_h + DAY_NUM_H + 4 + lane * (BAR_H + BAR_GAP))
-            x = int(c0 * cell_w) + 3
+            y = int(grid_top + wi * cell_h + DAY_NUM_H + 6 + lane * (BAR_H + BAR_GAP))
+            x = int(left + c0 * cell_w) + 4
             w = int((c1 - c0 + 1) * cell_w) - 6
             rect = QRect(x, y, w, BAR_H)
             color = self._cat_colors.get(plan.category_id, UNCAT_COLOR)
@@ -186,8 +218,8 @@ class CalendarView(QWidget):
             if n:
                 painter.drawText(
                     QRect(
-                        int(col * cell_w) + 5,
-                        int(HEADER_H + wi * cell_h + cell_h) - 16,
+                        int(left + col * cell_w) + 5,
+                        int(grid_top + wi * cell_h + cell_h) - 16,
                         int(cell_w) - 10,
                         14,
                     ),

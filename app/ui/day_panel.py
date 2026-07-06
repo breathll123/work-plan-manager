@@ -4,7 +4,6 @@ import sqlite3
 from datetime import date
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
@@ -16,12 +15,7 @@ from PySide6.QtWidgets import (
 
 from app.data.models import STATUS_NAMES
 from app.services.plan_service import PlanService
-from app.services.system_reminders import (
-    system_reminder_kind,
-    system_reminders_for_day,
-)
-from app.services.settings_service import get_theme
-from app.ui.theme import colors
+from app.ui.icons import set_button_icon
 
 
 class DayPanel(QDialog):
@@ -40,9 +34,11 @@ class DayPanel(QDialog):
         self.listw = QListWidget()
         layout.addWidget(self.listw)
         row = QHBoxLayout()
-        btn_new = QPushButton("+ 在这天新建")
+        btn_new = QPushButton("在这天新建")
+        set_button_icon(btn_new, "plus")
         btn_new.clicked.connect(lambda: self.new_plan_requested.emit(self.day))
         btn_close = QPushButton("关闭")
+        set_button_icon(btn_close, "close")
         btn_close.clicked.connect(self.close)
         row.addWidget(btn_new)
         row.addStretch()
@@ -53,22 +49,8 @@ class DayPanel(QDialog):
 
     def reload(self) -> None:
         self.listw.clear()
-        system_reminders = system_reminders_for_day(self.day)
-        theme_colors = colors(get_theme(self.conn))
-        for reminder in system_reminders:
-            item = QListWidgetItem(f"[系统提醒] {reminder.title}")
-            item.setFlags(Qt.ItemIsEnabled)
-            item.setData(Qt.UserRole, None)
-            item.setForeground(
-                QColor(
-                    theme_colors["holiday_text"]
-                    if system_reminder_kind(reminder) == "holiday"
-                    else theme_colors["solar_term_text"]
-                )
-            )
-            self.listw.addItem(item)
         plans = self.svc.plans.list_overlapping(self.day, self.day)
-        if not plans and not system_reminders:
+        if not plans:
             self.listw.addItem("这一天还没有计划")
             return
         for p in plans:

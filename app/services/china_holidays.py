@@ -16,7 +16,7 @@ class HolidayReminder:
 
     @property
     def title(self) -> str:
-        return f"中国大陆节假日：{self.name}"
+        return self.name
 
 
 def _daterange(start: date, end: date):

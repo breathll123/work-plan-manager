@@ -10,11 +10,6 @@ from PySide6.QtWidgets import QWidget
 
 from app.data.models import STATUS_DONE
 from app.services.category_service import CategoryService, text_color_for
-from app.services.system_reminders import (
-    SystemReminder,
-    system_reminder_kind,
-    system_reminders_for_day,
-)
 from app.services.plan_service import PlanService, month_grid_range
 from app.services.settings_service import get_theme
 from app.ui.theme import colors
@@ -138,22 +133,6 @@ class CalendarView(QWidget):
                     Qt.AlignRight | Qt.AlignTop,
                     str(day.day),
                 )
-                reminders = system_reminders_for_day(day)
-                if reminders:
-                    label_rect = QRect(x + 6, y + 6, int(cell_w) - 42, 18)
-                    kind = system_reminder_kind(reminders[0])
-                    painter.setPen(Qt.NoPen)
-                    painter.setBrush(QColor(self._reminder_bg(c, kind)))
-                    painter.drawRoundedRect(label_rect, 7, 7)
-                    painter.setPen(QColor(self._reminder_text(c, kind)))
-                    label = " / ".join(r.name for r in reminders)
-                    painter.drawText(
-                        label_rect.adjusted(6, 0, -6, 0),
-                        Qt.AlignCenter,
-                        painter.fontMetrics().elidedText(
-                            label, Qt.ElideRight, label_rect.width()
-                        ),
-                    )
             self._draw_week_bars(
                 painter, c, week, wi, left, grid_top, cell_w, cell_h, today
             )
@@ -172,18 +151,7 @@ class CalendarView(QWidget):
             key=lambda p: (p.start_date, p.id),
         )
         lanes: list[list[tuple[int, int]]] = []
-        system_spans = self._system_reminder_spans(week)
         overflow = [0] * 7
-        for c0, c1, reminder in system_spans:
-            lane = self._reserve_lane(lanes, c0, c1)
-            if lane is None:
-                for col in range(c0, c1 + 1):
-                    overflow[col] += 1
-                continue
-            self._draw_system_reminder_bar(
-                painter, c, wi, left, grid_top, cell_w, cell_h,
-                c0, c1, lane, reminder,
-            )
         for plan in wplans:
             c0 = max((plan.start_date - week_start).days, 0)
             c1 = min((plan.end_date - week_start).days, 6)
@@ -236,29 +204,6 @@ class CalendarView(QWidget):
                     f"+{n} 更多",
                 )
 
-    def _system_reminder_spans(
-        self, week: list[date]
-    ) -> list[tuple[int, int, SystemReminder]]:
-        spans: list[tuple[int, int, SystemReminder]] = []
-        seen: set[tuple[int, str]] = set()
-        i = 0
-        while i < len(week):
-            for reminder in system_reminders_for_day(week[i]):
-                key = (i, reminder.title)
-                if key in seen:
-                    continue
-                start = i
-                end = i
-                while end + 1 < len(week):
-                    next_reminders = system_reminders_for_day(week[end + 1])
-                    if not any(r.title == reminder.title for r in next_reminders):
-                        break
-                    end += 1
-                    seen.add((end, reminder.title))
-                spans.append((start, end, reminder))
-            i += 1
-        return spans
-
     def _reserve_lane(
         self, lanes: list[list[tuple[int, int]]], c0: int, c1: int
     ) -> int | None:
@@ -270,34 +215,6 @@ class CalendarView(QWidget):
             return None
         lanes.append([(c0, c1)])
         return len(lanes) - 1
-
-    def _draw_system_reminder_bar(
-        self, painter, c, wi, left, grid_top, cell_w, cell_h,
-        c0, c1, lane, reminder,
-    ) -> None:
-        y = int(grid_top + wi * cell_h + DAY_NUM_H + 6 + lane * (BAR_H + BAR_GAP))
-        x = int(left + c0 * cell_w) + 4
-        w = int((c1 - c0 + 1) * cell_w) - 6
-        rect = QRect(x, y, w, BAR_H)
-        kind = system_reminder_kind(reminder)
-        painter.setPen(QColor(self._reminder_text(c, kind)))
-        painter.setBrush(QColor(self._reminder_bg(c, kind)))
-        painter.drawRoundedRect(rect, 3, 3)
-        painter.setPen(QColor(self._reminder_text(c, kind)))
-        text_rect = rect.adjusted(6, 0, -6, 0)
-        painter.drawText(
-            text_rect,
-            Qt.AlignVCenter | Qt.AlignLeft,
-            painter.fontMetrics().elidedText(
-                reminder.title, Qt.ElideRight, text_rect.width()
-            ),
-        )
-
-    def _reminder_bg(self, c: dict[str, str], kind: str) -> str:
-        return c["holiday_bg"] if kind == "holiday" else c["solar_term_bg"]
-
-    def _reminder_text(self, c: dict[str, str], kind: str) -> str:
-        return c["holiday_text"] if kind == "holiday" else c["solar_term_text"]
 
     def _hit_plan(self, pos) -> int | None:
         for rect, plan_id in self._plan_hits:

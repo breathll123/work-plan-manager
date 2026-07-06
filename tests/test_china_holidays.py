@@ -18,4 +18,4 @@ def test_2026_holiday_outside_known_range_is_none():
 def test_holiday_reminder_is_system_title():
     reminders = holiday_reminders_for_day(date(2026, 10, 1))
     assert len(reminders) == 1
-    assert reminders[0].title == "中国大陆节假日：国庆"
+    assert reminders[0].title == "国庆"

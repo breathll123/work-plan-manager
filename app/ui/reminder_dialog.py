@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 from app.data.models import Plan
 from app.services.settings_service import get_theme
 from app.services.system_reminders import SystemReminder, system_reminder_kind
+from app.ui.icons import set_button_icon
 from app.ui.theme import colors
 
 
@@ -49,6 +50,7 @@ class ReminderDialog(QDialog):
         self._add_group(f"已逾期({len(overdue)})", overdue, "#D93026")
         self._add_group(f"今日到期({len(due_today)})", due_today, "#BA7517")
         btn = QPushButton("知道了")
+        set_button_icon(btn, "save")
         btn.clicked.connect(self.accept)
         layout.addWidget(btn, alignment=Qt.AlignRight)
         self.listw.itemDoubleClicked.connect(self._on_double_click)

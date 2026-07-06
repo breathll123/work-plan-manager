@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
 )
 
 from app.services.category_service import CategoryService
+from app.ui.icons import set_button_icon
 
 
 class CategoryDialog(QDialog):
@@ -29,19 +30,21 @@ class CategoryDialog(QDialog):
         self.listw = QListWidget()
         layout.addWidget(self.listw)
         row = QHBoxLayout()
-        for text, slot in (
-            ("新增", self._add),
-            ("重命名", self._rename),
-            ("改颜色", self._recolor),
-            ("删除", self._delete),
-            ("上移", lambda: self._move(-1)),
-            ("下移", lambda: self._move(1)),
+        for text, icon_name, slot in (
+            ("新增", "plus", self._add),
+            ("重命名", "tag", self._rename),
+            ("改颜色", "palette", self._recolor),
+            ("删除", "trash", self._delete),
+            ("上移", "up", lambda: self._move(-1)),
+            ("下移", "down", lambda: self._move(1)),
         ):
             b = QPushButton(text)
+            set_button_icon(b, icon_name)
             b.clicked.connect(slot)
             row.addWidget(b)
         layout.addLayout(row)
         close_btn = QPushButton("关闭")
+        set_button_icon(close_btn, "close")
         close_btn.clicked.connect(self.accept)
         layout.addWidget(close_btn, alignment=Qt.AlignRight)
         self._reload()

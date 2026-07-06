@@ -7,7 +7,7 @@ from datetime import date, datetime, time, timedelta
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from app.data.db import app_dir, backup, connect, default_db_path, is_dir_writable
+from app.data.db import backup, connect, data_dir, default_db_path, is_dir_writable
 from app.services.reminder_service import get_reminders
 from app.services.settings_service import (
     get_theme,
@@ -15,6 +15,7 @@ from app.services.settings_service import (
     mark_system_reminder_shown,
 )
 from app.services.system_reminders import system_reminders_for_day
+from app.ui.icons import app_icon
 from app.ui.main_window import MainWindow
 from app.ui.reminder_dialog import ReminderDialog
 from app.ui.theme import apply_theme
@@ -76,13 +77,14 @@ def _schedule_holiday_reminder(conn, win) -> None:
 def run() -> None:
     app = QApplication(sys.argv)
     app.setApplicationName("工作计划")
+    app.setWindowIcon(app_icon())
     _install_excepthook()
-    directory = app_dir()
+    directory = data_dir()
     if not is_dir_writable(directory):
         QMessageBox.critical(
             None,
             "无法启动",
-            "软件所在目录不可写,数据将无法保存。\n"
+            "软件数据目录不可写,数据将无法保存。\n"
             "请将软件放到可写目录(不要放在 Program Files)。",
         )
         sys.exit(1)

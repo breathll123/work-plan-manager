@@ -2,7 +2,7 @@ import sqlite3
 
 import pytest
 
-from app.data.db import backup, is_dir_writable
+from app.data.db import backup, default_db_path, is_dir_writable
 
 
 def test_connect_creates_tables(conn):
@@ -48,3 +48,24 @@ def test_backup_missing_db_is_noop(tmp_path):
 
 def test_is_dir_writable(tmp_path):
     assert is_dir_writable(tmp_path) is True
+
+
+def test_default_db_path_uses_data_folder(tmp_path, monkeypatch):
+    import app.data.db as db
+
+    monkeypatch.setattr(db, "app_dir", lambda: tmp_path)
+    assert default_db_path() == tmp_path / "data" / "workplan.db"
+    assert (tmp_path / "data").is_dir()
+
+
+def test_default_db_path_migrates_legacy_root_db(tmp_path, monkeypatch):
+    import app.data.db as db
+
+    legacy = tmp_path / "workplan.db"
+    legacy.write_text("legacy", encoding="utf-8")
+    monkeypatch.setattr(db, "app_dir", lambda: tmp_path)
+
+    target = default_db_path()
+
+    assert target.read_text(encoding="utf-8") == "legacy"
+    assert not legacy.exists()

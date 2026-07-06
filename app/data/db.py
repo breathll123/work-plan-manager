@@ -48,13 +48,33 @@ def app_dir() -> Path:
     return Path(__file__).resolve().parent.parent.parent
 
 
+def data_dir() -> Path:
+    return app_dir() / "data"
+
+
+def _migrate_legacy_db(target: Path) -> None:
+    legacy = app_dir() / "workplan.db"
+    if not legacy.exists() or target.exists():
+        return
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(legacy), str(target))
+    for suffix in ("-wal", "-shm"):
+        sidecar = legacy.with_name(legacy.name + suffix)
+        if sidecar.exists():
+            shutil.move(str(sidecar), str(target.with_name(target.name + suffix)))
+
+
 def default_db_path() -> Path:
-    return app_dir() / "workplan.db"
+    path = data_dir() / "workplan.db"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _migrate_legacy_db(path)
+    return path
 
 
 def is_dir_writable(d: Path) -> bool:
     probe = d / ".write_probe"
     try:
+        d.mkdir(parents=True, exist_ok=True)
         probe.write_text("x", encoding="utf-8")
         probe.unlink()
         return True

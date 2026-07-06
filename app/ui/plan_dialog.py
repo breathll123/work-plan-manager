@@ -26,6 +26,7 @@ from app import platform_utils
 from app.data.models import STATUS_NAMES
 from app.services.category_service import CategoryService
 from app.services.plan_service import PlanService
+from app.ui.icons import set_button_icon
 from app.ui.widgets import ModernDateEdit
 
 
@@ -93,28 +94,32 @@ class PlanDialog(QDialog):
         self.links_list = QListWidget()
         layout.addWidget(self.links_list)
         btns = QHBoxLayout()
-        for text, slot in (
-            ("添加文件夹", self._add_folder),
-            ("添加文件", self._add_file),
-            ("打开", self._open_selected),
-            ("移除", self._remove_selected),
+        for text, icon_name, slot in (
+            ("添加文件夹", "folder", self._add_folder),
+            ("添加文件", "file", self._add_file),
+            ("打开", "open", self._open_selected),
+            ("移除", "trash", self._remove_selected),
         ):
             b = QPushButton(text)
+            set_button_icon(b, icon_name)
             b.clicked.connect(slot)
             btns.addWidget(b)
         layout.addLayout(btns)
         footer = QHBoxLayout()
         self.btn_delete = QPushButton("删除计划")
         self.btn_delete.setObjectName("dangerButton")
+        set_button_icon(self.btn_delete, "trash")
         self.btn_delete.clicked.connect(self._delete)
         self.btn_delete.setVisible(self.plan_id is not None)
         footer.addWidget(self.btn_delete)
         footer.addStretch()
         cancel = QPushButton("取消")
         cancel.setObjectName("quietButton")
+        set_button_icon(cancel, "close")
         cancel.clicked.connect(self.reject)
         save = QPushButton("保存")
         save.setObjectName("primaryButton")
+        set_button_icon(save, "save", color="#FFFFFF")
         save.setDefault(True)
         save.clicked.connect(self._save)
         footer.addWidget(cancel)

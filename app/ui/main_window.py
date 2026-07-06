@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
 from app.services.category_service import CategoryService
 from app.services.plan_service import PlanService
 from app.services.settings_service import get_theme, set_theme
+from app.ui.icons import app_icon, set_button_icon
 from app.ui.theme import apply_theme
 
 UNCATEGORIZED = None
@@ -33,12 +34,14 @@ class MainWindow(QMainWindow):
         today = date.today()
         self.current_year, self.current_month = today.year, today.month
         self.setWindowTitle("工作计划")
+        self.setWindowIcon(app_icon())
         self.resize(1000, 680)
         self._day_panels = []
         self._build_toolbar()
         self._build_body()
         self.refresh_categories()
         self._update_month_label()
+        self.refresh_views()
         self.btn_manage_cats.clicked.connect(self._open_category_dialog)
         self.btn_new.clicked.connect(self._new_plan)
 
@@ -56,7 +59,8 @@ class MainWindow(QMainWindow):
         self.month_label.setObjectName("monthTitle")
         self.btn_cal = QPushButton("月历")
         self.btn_list = QPushButton("列表")
-        for b in (self.btn_cal, self.btn_list):
+        self.btn_year = QPushButton("年")
+        for b in (self.btn_cal, self.btn_list, self.btn_year):
             b.setCheckable(True)
             b.setObjectName("segmentButton")
         self.btn_cal.setChecked(True)
@@ -73,13 +77,20 @@ class MainWindow(QMainWindow):
         self.toolbar.addWidget(spacer)
         self.toolbar.addWidget(self.btn_cal)
         self.toolbar.addWidget(self.btn_list)
+        self.toolbar.addWidget(self.btn_year)
         self.toolbar.addWidget(self.btn_new)
         self.toolbar.addWidget(self.btn_theme)
+        set_button_icon(self.btn_today, "calendar")
+        set_button_icon(self.btn_cal, "calendar")
+        set_button_icon(self.btn_list, "list")
+        set_button_icon(self.btn_year, "year")
+        set_button_icon(self.btn_new, "plus", color="#FFFFFF")
         self.btn_prev.clicked.connect(lambda: self._shift_month(-1))
         self.btn_next.clicked.connect(lambda: self._shift_month(1))
         self.btn_today.clicked.connect(self._goto_today)
         self.btn_cal.clicked.connect(lambda: self._switch_view(0))
         self.btn_list.clicked.connect(lambda: self._switch_view(1))
+        self.btn_year.clicked.connect(lambda: self._switch_view(2))
         self.btn_theme.clicked.connect(self._toggle_theme)
         self._sync_theme_button()
 
@@ -103,10 +114,12 @@ class MainWindow(QMainWindow):
         self.side_layout.addStretch()
         self.btn_manage_cats = QPushButton("管理分类")
         self.btn_manage_cats.setObjectName("sidebarButton")
+        set_button_icon(self.btn_manage_cats, "tag")
         self.side_layout.addWidget(self.btn_manage_cats)
         self.view_stack = QStackedWidget()
         from app.ui.calendar_view import CalendarView
         from app.ui.list_view import ListView
+        from app.ui.year_view import YearView
 
         self.calendar_view = CalendarView(
             self.conn,
@@ -120,6 +133,14 @@ class MainWindow(QMainWindow):
         self.list_view = ListView(self.conn, self.selected_category_ids)
         self.list_view.plan_activated.connect(self._edit_plan)
         self.view_stack.addWidget(self.list_view)
+        self.year_view = YearView(
+            self.conn,
+            self.selected_category_ids,
+            lambda: self.current_year,
+        )
+        self.year_view.day_clicked.connect(self._show_day_panel)
+        self.year_view.day_double_clicked.connect(self._new_plan_on)
+        self.view_stack.addWidget(self.year_view)
         layout.addWidget(side)
         layout.addWidget(self.view_stack, stretch=1)
         self.setCentralWidget(root)
@@ -127,10 +148,17 @@ class MainWindow(QMainWindow):
     def _switch_view(self, index: int) -> None:
         self.btn_cal.setChecked(index == 0)
         self.btn_list.setChecked(index == 1)
+        self.btn_year.setChecked(index == 2)
         self.view_stack.setCurrentIndex(index)
+        self._update_month_label()
         self.refresh_views()
 
     def _shift_month(self, delta: int) -> None:
+        if self._current_view_index() == 2:
+            self.current_year += delta
+            self._update_month_label()
+            self.refresh_views()
+            return
         m = self.current_month + delta
         if m == 0:
             self.current_year, self.current_month = self.current_year - 1, 12
@@ -148,7 +176,14 @@ class MainWindow(QMainWindow):
         self.refresh_views()
 
     def _update_month_label(self) -> None:
-        self.month_label.setText(f"{self.current_year}年{self.current_month}月")
+        if self._current_view_index() == 2:
+            self.month_label.setText(f"{self.current_year}年")
+        else:
+            self.month_label.setText(f"{self.current_year}年{self.current_month}月")
+
+    def _current_view_index(self) -> int:
+        stack = getattr(self, "view_stack", None)
+        return stack.currentIndex() if stack is not None else 0
 
     def refresh_categories(self) -> None:
         checked = {}
@@ -180,7 +215,12 @@ class MainWindow(QMainWindow):
         return [b.property("cat_id") for b in boxes if b.isChecked()]
 
     def refresh_views(self) -> None:
-        for view in (getattr(self, "calendar_view", None), getattr(self, "list_view", None)):
+        views = (
+            getattr(self, "calendar_view", None),
+            getattr(self, "list_view", None),
+            getattr(self, "year_view", None),
+        )
+        for view in views:
             if hasattr(view, "refresh"):
                 view.refresh()
         for panel in list(self._day_panels):
@@ -201,6 +241,7 @@ class MainWindow(QMainWindow):
     def _sync_theme_button(self) -> None:
         dark = get_theme(self.conn) == "dark"
         self.btn_theme.setText("浅色" if dark else "深色")
+        set_button_icon(self.btn_theme, "sun" if dark else "moon")
 
     def _open_category_dialog(self) -> None:
         from app.ui.category_dialog import CategoryDialog

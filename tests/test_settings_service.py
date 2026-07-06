@@ -1,6 +1,15 @@
+from datetime import date
+
 import pytest
 
-from app.services.settings_service import get_setting, get_theme, set_setting, set_theme
+from app.services.settings_service import (
+    get_setting,
+    get_theme,
+    has_holiday_reminder_been_shown,
+    mark_holiday_reminder_shown,
+    set_setting,
+    set_theme,
+)
 
 
 def test_get_setting_default(conn):
@@ -25,3 +34,10 @@ def test_theme_roundtrip(conn):
 def test_theme_rejects_unknown(conn):
     with pytest.raises(ValueError):
         set_theme(conn, "blue")
+
+
+def test_holiday_reminder_shown_marker(conn):
+    day = date(2026, 10, 1)
+    assert has_holiday_reminder_been_shown(conn, day) is False
+    mark_holiday_reminder_shown(conn, day)
+    assert has_holiday_reminder_been_shown(conn, day) is True

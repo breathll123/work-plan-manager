@@ -9,6 +9,16 @@ class HolidayInfo:
     name: str
 
 
+@dataclass(frozen=True)
+class HolidayReminder:
+    day: date
+    name: str
+
+    @property
+    def title(self) -> str:
+        return f"中国大陆节假日：{self.name}"
+
+
 def _daterange(start: date, end: date):
     current = start
     while current <= end:
@@ -40,3 +50,15 @@ CHINA_MAINLAND_HOLIDAYS = {
 
 def china_mainland_holiday(day: date) -> HolidayInfo | None:
     return CHINA_MAINLAND_HOLIDAYS.get(day.year, {}).get(day)
+
+
+def holiday_reminder_for(day: date) -> HolidayReminder | None:
+    holiday = china_mainland_holiday(day)
+    if holiday is None:
+        return None
+    return HolidayReminder(day=day, name=holiday.name)
+
+
+def holiday_reminders_for_day(day: date) -> list[HolidayReminder]:
+    reminder = holiday_reminder_for(day)
+    return [reminder] if reminder is not None else []

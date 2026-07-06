@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QWidget
 
 from app.data.models import STATUS_DONE
 from app.services.category_service import CategoryService, text_color_for
-from app.services.china_holidays import china_mainland_holiday
+from app.services.china_holidays import china_mainland_holiday, holiday_reminder_for
 from app.services.plan_service import PlanService, month_grid_range
 from app.services.settings_service import get_theme
 from app.ui.theme import colors
@@ -20,7 +20,7 @@ HEADER_H = 38
 DAY_NUM_H = 28
 BAR_H = 17
 BAR_GAP = 2
-MAX_LANES = 3
+MAX_LANES = 4
 UNCAT_COLOR = "#888888"
 WEEKDAYS = ("周一", "周二", "周三", "周四", "周五", "周六", "周日")
 
@@ -166,6 +166,14 @@ class CalendarView(QWidget):
             key=lambda p: (p.start_date, p.id),
         )
         lanes: list[list[tuple[int, int]]] = []
+        holiday_spans = self._holiday_spans(week)
+        if holiday_spans:
+            lanes.append([])
+            for c0, c1, name in holiday_spans:
+                lanes[0].append((c0, c1))
+                self._draw_holiday_bar(
+                    painter, c, wi, left, grid_top, cell_w, cell_h, c0, c1, name
+                )
         overflow = [0] * 7
         for plan in wplans:
             c0 = max((plan.start_date - week_start).days, 0)
@@ -226,6 +234,45 @@ class CalendarView(QWidget):
                     Qt.AlignLeft,
                     f"+{n} 更多",
                 )
+
+    def _holiday_spans(self, week: list[date]) -> list[tuple[int, int, str]]:
+        spans: list[tuple[int, int, str]] = []
+        i = 0
+        while i < len(week):
+            holiday = holiday_reminder_for(week[i])
+            if holiday is None:
+                i += 1
+                continue
+            start = i
+            name = holiday.name
+            while i + 1 < len(week):
+                next_holiday = holiday_reminder_for(week[i + 1])
+                if next_holiday is None or next_holiday.name != name:
+                    break
+                i += 1
+            spans.append((start, i, name))
+            i += 1
+        return spans
+
+    def _draw_holiday_bar(
+        self, painter, c, wi, left, grid_top, cell_w, cell_h, c0, c1, name
+    ) -> None:
+        y = int(grid_top + wi * cell_h + DAY_NUM_H + 6)
+        x = int(left + c0 * cell_w) + 4
+        w = int((c1 - c0 + 1) * cell_w) - 6
+        rect = QRect(x, y, w, BAR_H)
+        painter.setPen(QColor(c["cal_overdue"]))
+        painter.setBrush(QColor(c["holiday_bg"]))
+        painter.drawRoundedRect(rect, 3, 3)
+        painter.setPen(QColor(c["cal_overdue"]))
+        text_rect = rect.adjusted(6, 0, -6, 0)
+        painter.drawText(
+            text_rect,
+            Qt.AlignVCenter | Qt.AlignLeft,
+            painter.fontMetrics().elidedText(
+                f"节假日 · {name}", Qt.ElideRight, text_rect.width()
+            ),
+        )
 
     def _hit_plan(self, pos) -> int | None:
         for rect, plan_id in self._plan_hits:

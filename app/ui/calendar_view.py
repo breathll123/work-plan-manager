@@ -10,7 +10,11 @@ from PySide6.QtWidgets import QWidget
 
 from app.data.models import STATUS_DONE
 from app.services.category_service import CategoryService, text_color_for
-from app.services.system_reminders import SystemReminder, system_reminders_for_day
+from app.services.system_reminders import (
+    SystemReminder,
+    system_reminder_kind,
+    system_reminders_for_day,
+)
 from app.services.plan_service import PlanService, month_grid_range
 from app.services.settings_service import get_theme
 from app.ui.theme import colors
@@ -137,10 +141,11 @@ class CalendarView(QWidget):
                 reminders = system_reminders_for_day(day)
                 if reminders:
                     label_rect = QRect(x + 6, y + 6, int(cell_w) - 42, 18)
+                    kind = system_reminder_kind(reminders[0])
                     painter.setPen(Qt.NoPen)
-                    painter.setBrush(QColor(c["holiday_bg"]))
+                    painter.setBrush(QColor(self._reminder_bg(c, kind)))
                     painter.drawRoundedRect(label_rect, 7, 7)
-                    painter.setPen(QColor(c["cal_overdue"]))
+                    painter.setPen(QColor(self._reminder_text(c, kind)))
                     label = " / ".join(r.name for r in reminders)
                     painter.drawText(
                         label_rect.adjusted(6, 0, -6, 0),
@@ -274,10 +279,11 @@ class CalendarView(QWidget):
         x = int(left + c0 * cell_w) + 4
         w = int((c1 - c0 + 1) * cell_w) - 6
         rect = QRect(x, y, w, BAR_H)
-        painter.setPen(QColor(c["cal_overdue"]))
-        painter.setBrush(QColor(c["holiday_bg"]))
+        kind = system_reminder_kind(reminder)
+        painter.setPen(QColor(self._reminder_text(c, kind)))
+        painter.setBrush(QColor(self._reminder_bg(c, kind)))
         painter.drawRoundedRect(rect, 3, 3)
-        painter.setPen(QColor(c["cal_overdue"]))
+        painter.setPen(QColor(self._reminder_text(c, kind)))
         text_rect = rect.adjusted(6, 0, -6, 0)
         painter.drawText(
             text_rect,
@@ -286,6 +292,12 @@ class CalendarView(QWidget):
                 reminder.title, Qt.ElideRight, text_rect.width()
             ),
         )
+
+    def _reminder_bg(self, c: dict[str, str], kind: str) -> str:
+        return c["holiday_bg"] if kind == "holiday" else c["solar_term_bg"]
+
+    def _reminder_text(self, c: dict[str, str], kind: str) -> str:
+        return c["holiday_text"] if kind == "holiday" else c["solar_term_text"]
 
     def _hit_plan(self, pos) -> int | None:
         for rect, plan_id in self._plan_hits:

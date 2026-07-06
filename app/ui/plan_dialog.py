@@ -68,6 +68,9 @@ class PlanDialog(QDialog):
         form.addRow("分类", self.cat_combo)
         self.start_edit = QDateEdit(calendarPopup=True)
         self.end_edit = QDateEdit(calendarPopup=True)
+        for edit in (self.start_edit, self.end_edit):
+            edit.setDisplayFormat("yyyy-MM-dd")
+            edit.calendarWidget().setGridVisible(False)
         dates = QHBoxLayout()
         dates.addWidget(self.start_edit)
         dates.addWidget(QLabel("至"))

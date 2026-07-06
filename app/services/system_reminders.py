@@ -17,3 +17,9 @@ def system_reminders_for_day(day: date) -> list[SystemReminder]:
         *holiday_reminders_for_day(day),
         *solar_term_reminders_for_day(day),
     ]
+
+
+def system_reminder_kind(reminder: SystemReminder) -> str:
+    if isinstance(reminder, HolidayReminder):
+        return "holiday"
+    return "solar_term"

@@ -14,7 +14,9 @@ from PySide6.QtWidgets import (
 )
 
 from app.data.models import Plan
-from app.services.system_reminders import SystemReminder
+from app.services.settings_service import get_theme
+from app.services.system_reminders import SystemReminder, system_reminder_kind
+from app.ui.theme import colors
 
 
 class ReminderDialog(QDialog):
@@ -29,6 +31,7 @@ class ReminderDialog(QDialog):
         system_reminders: list[SystemReminder] | None = None,
     ):
         super().__init__(parent)
+        self.conn = conn
         system_reminders = system_reminders or []
         self.setWindowTitle("待办提醒")
         self.resize(380, 340)
@@ -72,12 +75,19 @@ class ReminderDialog(QDialog):
             return
         header = QListWidgetItem(title)
         header.setFlags(Qt.ItemIsEnabled)
-        header.setForeground(QColor("#C6473A"))
+        theme_colors = colors(get_theme(self.conn))
+        header.setForeground(QColor(theme_colors["holiday_text"]))
         self.listw.addItem(header)
         for reminder in reminders:
             item = QListWidgetItem(
                 f"    {reminder.title}({reminder.day.isoformat()} 08:00)"
             )
             item.setFlags(Qt.ItemIsEnabled)
-            item.setForeground(QColor("#C6473A"))
+            item.setForeground(
+                QColor(
+                    theme_colors["holiday_text"]
+                    if system_reminder_kind(reminder) == "holiday"
+                    else theme_colors["solar_term_text"]
+                )
+            )
             self.listw.addItem(item)

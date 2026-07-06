@@ -27,6 +27,9 @@ COLORS = {
         "cal_done_text": "#8FA098",
         "cal_weekend_bg": "#EDF6F1",
         "holiday_bg": "#F6DDD8",
+        "holiday_text": "#B6473B",
+        "solar_term_bg": "#DDEFE8",
+        "solar_term_text": "#12675F",
     },
     "dark": {
         "window": "#111B1B",
@@ -51,6 +54,9 @@ COLORS = {
         "cal_done_text": "#748A84",
         "cal_weekend_bg": "#1B2B29",
         "holiday_bg": "#42302E",
+        "holiday_text": "#F09A90",
+        "solar_term_bg": "#203D38",
+        "solar_term_text": "#8FE0D1",
     },
 }
 
@@ -103,6 +109,50 @@ QLineEdit, QComboBox, QDateEdit, QTextEdit, QSpinBox {{
 QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QTextEdit:focus, QSpinBox:focus {{
     border: 1px solid {accent};
     background: {base};
+}}
+QDateEdit::drop-down {{
+    width: 22px;
+    border-left: 1px solid {border};
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    background: {accent_soft};
+}}
+QDateEdit::down-arrow {{
+    image: none;
+    width: 0;
+    height: 0;
+}}
+QCalendarWidget QWidget {{
+    alternate-background-color: {paper_alt};
+}}
+QCalendarWidget QToolButton {{
+    background: {accent_soft};
+    color: {accent};
+    border: 1px solid {border};
+    border-radius: 6px;
+    margin: 2px;
+    padding: 4px 8px;
+    outline: none;
+}}
+QCalendarWidget QToolButton:hover {{
+    background: {hover};
+}}
+QCalendarWidget QMenu {{
+    background: {base};
+    border: 1px solid {border};
+}}
+QCalendarWidget QSpinBox {{
+    background: {base};
+    border: 1px solid {border};
+    border-radius: 6px;
+    padding: 3px 5px;
+}}
+QCalendarWidget QAbstractItemView {{
+    background: {base};
+    color: {text};
+    selection-background-color: {accent_soft};
+    selection-color: {text};
+    outline: none;
 }}
 QTableWidget {{ background: {base}; gridline-color: {cal_grid};
     border: 1px solid {border};

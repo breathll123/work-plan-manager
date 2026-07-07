@@ -3,7 +3,7 @@ from __future__ import annotations
 from PySide6.QtCore import QPoint, QRect, QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap
 
-ICON_COLOR = "#0D5A55"
+ICON_COLOR = "#1D4ED8"
 
 
 def icon(name: str, color: str = ICON_COLOR, size: int = 18) -> QIcon:
@@ -101,7 +101,7 @@ def app_icon(size: int = 64) -> QIcon:
     p.setRenderHint(QPainter.Antialiasing)
     bg = QPainterPath()
     bg.addRoundedRect(QRectF(4, 4, size - 8, size - 8), 14, 14)
-    p.fillPath(bg, QColor("#167168"))
+    p.fillPath(bg, QColor("#2563EB"))
     pen = QPen(QColor("#FFFFFF"))
     pen.setWidth(4)
     pen.setStyle(Qt.SolidLine)

@@ -20,9 +20,11 @@ jobs:
         with:
           name: 工作计划-windows-exe
           path: dist/工作计划.exe
+      - name: 生成英文名副本(Release 附件不支持中文文件名)
+        run: Copy-Item "dist/工作计划.exe" "dist/WorkPlanManager-${{ github.ref_name }}-windows.exe"
       - name: 创建 Release 并附上 exe
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/工作计划.exe
+          files: dist/WorkPlanManager-${{ github.ref_name }}-windows.exe
           generate_release_notes: true

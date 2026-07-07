@@ -7,7 +7,14 @@ from datetime import date, datetime, time, timedelta
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from app.data.db import backup, connect, data_dir, default_db_path, is_dir_writable
+from app.data.db import (
+    app_dir,
+    backup,
+    connect,
+    data_dir,
+    default_db_path,
+    is_dir_writable,
+)
 from app.services.reminder_service import get_reminders
 from app.services.settings_service import (
     get_theme,

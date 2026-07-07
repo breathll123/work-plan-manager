@@ -46,6 +46,36 @@ def test_backup_missing_db_is_noop(tmp_path):
     assert not (tmp_path / "backups").exists()
 
 
+def test_connect_creates_upgrade_backup_for_existing_old_db(tmp_path):
+    from app.data.db import connect
+
+    db_path = tmp_path / "workplan.db"
+    old = sqlite3.connect(db_path)
+    old.execute("CREATE TABLE old_marker (id INTEGER PRIMARY KEY)")
+    old.execute("PRAGMA user_version = 0")
+    old.commit()
+    old.close()
+
+    conn = connect(db_path)
+    conn.close()
+
+    backups = list((tmp_path / "backups").glob("workplan-*-before-upgrade-v0-to-v1.db"))
+    assert len(backups) == 1
+
+
+def test_connect_rejects_newer_database_version(tmp_path):
+    from app.data.db import connect
+
+    db_path = tmp_path / "workplan.db"
+    newer = sqlite3.connect(db_path)
+    newer.execute("PRAGMA user_version = 999")
+    newer.commit()
+    newer.close()
+
+    with pytest.raises(RuntimeError, match="高于当前程序支持"):
+        connect(db_path)
+
+
 def test_is_dir_writable(tmp_path):
     assert is_dir_writable(tmp_path) is True
 

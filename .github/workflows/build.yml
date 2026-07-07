@@ -3,6 +3,8 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: windows-latest
@@ -18,3 +20,9 @@ jobs:
         with:
           name: 工作计划-windows-exe
           path: dist/工作计划.exe
+      - name: 创建 Release 并附上 exe
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/工作计划.exe
+          generate_release_notes: true

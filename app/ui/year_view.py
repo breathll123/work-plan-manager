@@ -85,7 +85,7 @@ class YearView(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
         c = colors(get_theme(self.conn))
         self._day_cells = []
-        page = self.rect().adjusted(14, 14, -14, -14)
+        page = self.rect().adjusted(0, 0, -1, -1)
         painter.setPen(QColor(c["border"]))
         painter.setBrush(QColor(c["paper"]))
         painter.drawRoundedRect(page, 14, 14)

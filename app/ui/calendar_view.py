@@ -18,7 +18,7 @@ from app.services.system_reminders import (
 )
 from app.ui.theme import colors
 
-OUTER_PAD = 14
+OUTER_PAD = 0
 HEADER_H = 38
 DAY_NUM_H = 28
 BAR_H = 17
@@ -75,10 +75,12 @@ class CalendarView(QWidget):
         c = colors(get_theme(self.conn))
         _, month = self.current_month()
         today = date.today()
-        page = self.rect().adjusted(OUTER_PAD, OUTER_PAD, -OUTER_PAD, -OUTER_PAD)
+        page = self.rect().adjusted(
+            OUTER_PAD, OUTER_PAD, -OUTER_PAD - 1, -OUTER_PAD - 1
+        )
         painter.setPen(QColor(c["border"]))
         painter.setBrush(QColor(c["paper"]))
-        painter.drawRoundedRect(page, 10, 10)
+        painter.drawRoundedRect(page, 14, 14)
         cell_w = page.width() / 7
         rows = max(len(self._weeks), 1)
         cell_h = (page.height() - HEADER_H) / rows

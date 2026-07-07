@@ -94,13 +94,13 @@ QWidget {{
 QWidget#appRoot {{ background: {window}; }}
 QWidget#sidePanel {{
     background: {sidebar};
-    border-right: 1px solid {border};
+    border: 1px solid {border};
+    border-radius: 14px;
 }}
 QWidget#detailPanel {{
     background: {paper};
-    border-left: 1px solid {border};
-    border-top-left-radius: 14px;
-    border-bottom-left-radius: 14px;
+    border: 1px solid {border};
+    border-radius: 14px;
 }}
 QLabel#detailTitle {{
     color: {text};

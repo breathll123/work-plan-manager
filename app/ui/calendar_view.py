@@ -124,16 +124,16 @@ class CalendarView(QWidget):
                 if is_today:
                     painter.setPen(Qt.NoPen)
                     painter.setBrush(QColor(c["cal_today_bg"]))
-                    today_rect = rect.adjusted(2, 2, -2, -2)
-                    painter.drawRoundedRect(today_rect, 10, 10)
+                    today_rect = rect.adjusted(1, 1, -1, -1)
+                    painter.drawRoundedRect(today_rect, 8, 8)
                 painter.setPen(QColor(c["cal_grid"]))
                 painter.setBrush(Qt.NoBrush)
                 painter.drawRect(rect)
                 if is_today:
                     pen = QPen(QColor(c["cal_today"]))
-                    pen.setWidth(2)
+                    pen.setWidth(1)
                     painter.setPen(pen)
-                    painter.drawRoundedRect(today_rect, 10, 10)
+                    painter.drawRoundedRect(today_rect, 8, 8)
                 in_month = day.month == month
                 date_font = painter.font()
                 date_font.setBold(is_today)

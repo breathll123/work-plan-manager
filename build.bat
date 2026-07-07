@@ -40,8 +40,16 @@ echo Building exe...
 if errorlevel 1 goto fail
 
 echo.
-echo Build finished: dist\WorkPlan.exe
-echo You can rename WorkPlan.exe after build if needed.
+echo Packaging portable zip...
+if exist "pkg" rmdir /s /q "pkg"
+mkdir "pkg\WorkPlan"
+copy /y "dist\WorkPlan.exe" "pkg\WorkPlan\" >nul
+copy /y "packaging\*.txt" "pkg\WorkPlan\" >nul
+powershell -NoProfile -Command "Compress-Archive -Force -Path 'pkg/WorkPlan' -DestinationPath 'dist/WorkPlan-windows.zip'"
+if errorlevel 1 goto fail
+
+echo.
+echo Build finished: dist\WorkPlan-windows.zip
 pause
 exit /b 0
 

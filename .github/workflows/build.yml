@@ -20,11 +20,15 @@ jobs:
         with:
           name: 工作计划-windows-exe
           path: dist/工作计划.exe
-      - name: 生成英文名副本(Release 附件不支持中文文件名)
-        run: Copy-Item "dist/工作计划.exe" "dist/WorkPlanManager-${{ github.ref_name }}-windows.exe"
-      - name: 创建 Release 并附上 exe
+      - name: 打包便携版压缩包(exe + 使用说明)
+        run: |
+          New-Item -ItemType Directory -Path "pkg/工作计划" -Force | Out-Null
+          Copy-Item "dist/工作计划.exe" "pkg/工作计划/"
+          Copy-Item "packaging/使用说明.txt" "pkg/工作计划/"
+          Compress-Archive -Path "pkg/工作计划" -DestinationPath "dist/WorkPlanManager-${{ github.ref_name }}-windows.zip"
+      - name: 创建 Release 并附上压缩包
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/WorkPlanManager-${{ github.ref_name }}-windows.exe
+          files: dist/WorkPlanManager-${{ github.ref_name }}-windows.zip
           generate_release_notes: true

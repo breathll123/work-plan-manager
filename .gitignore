@@ -13,3 +13,4 @@ error.log
 
 # 设计文档仅保留本地
 docs/
+pkg/

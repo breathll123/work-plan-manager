@@ -36,7 +36,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("工作计划")
         self.setWindowIcon(app_icon())
         self.resize(1000, 680)
-        self._day_panels = []
         self._build_toolbar()
         self._build_body()
         self.refresh_categories()
@@ -103,21 +102,37 @@ class MainWindow(QMainWindow):
         side = QWidget()
         side.setObjectName("sidePanel")
         side.setFixedWidth(190)
+        self.side = side
+        self.side_expanded = True
         self.side_layout = QVBoxLayout(side)
         self.side_layout.setContentsMargins(16, 18, 16, 16)
         self.side_layout.setSpacing(10)
-        cap = QLabel("分类筛选")
-        cap.setObjectName("mutedLabel")
-        self.side_layout.addWidget(cap)
+        side_header = QHBoxLayout()
+        side_header.setSpacing(8)
+        self.side_caption = QLabel("分类筛选")
+        self.side_caption.setObjectName("mutedLabel")
+        side_header.addWidget(self.side_caption, stretch=1)
+        self.btn_toggle_side = QPushButton("‹")
+        self.btn_toggle_side.setObjectName("navButton")
+        self.btn_toggle_side.setToolTip("收起分类")
+        self.btn_toggle_side.clicked.connect(self._toggle_sidebar)
+        side_header.addWidget(self.btn_toggle_side)
+        self.side_layout.addLayout(side_header)
+        self.side_content = QWidget()
+        side_content_layout = QVBoxLayout(self.side_content)
+        side_content_layout.setContentsMargins(0, 0, 0, 0)
+        side_content_layout.setSpacing(10)
         self.cat_box_container = QVBoxLayout()
-        self.side_layout.addLayout(self.cat_box_container)
-        self.side_layout.addStretch()
+        side_content_layout.addLayout(self.cat_box_container)
+        side_content_layout.addStretch()
         self.btn_manage_cats = QPushButton("管理分类")
         self.btn_manage_cats.setObjectName("sidebarButton")
         set_button_icon(self.btn_manage_cats, "tag")
-        self.side_layout.addWidget(self.btn_manage_cats)
+        side_content_layout.addWidget(self.btn_manage_cats)
+        self.side_layout.addWidget(self.side_content, stretch=1)
         self.view_stack = QStackedWidget()
         from app.ui.calendar_view import CalendarView
+        from app.ui.day_detail_panel import DayDetailPanel
         from app.ui.list_view import ListView
         from app.ui.year_view import YearView
 
@@ -141,9 +156,31 @@ class MainWindow(QMainWindow):
         self.year_view.day_clicked.connect(self._show_day_panel)
         self.year_view.day_double_clicked.connect(self._new_plan_on)
         self.view_stack.addWidget(self.year_view)
+        self.day_detail = DayDetailPanel(self.conn)
+        self.day_detail.plan_activated.connect(self._edit_plan)
+        self.day_detail.new_plan_requested.connect(self._new_plan_on)
+        self.day_detail.setVisible(False)
         layout.addWidget(side)
         layout.addWidget(self.view_stack, stretch=1)
+        layout.addWidget(self.day_detail)
         self.setCentralWidget(root)
+
+    def _toggle_sidebar(self) -> None:
+        self.side_expanded = not self.side_expanded
+        if self.side_expanded:
+            self.side.setFixedWidth(190)
+            self.side_layout.setContentsMargins(16, 18, 16, 16)
+            self.side_caption.setVisible(True)
+            self.side_content.setVisible(True)
+            self.btn_toggle_side.setText("‹")
+            self.btn_toggle_side.setToolTip("收起分类")
+        else:
+            self.side.setFixedWidth(54)
+            self.side_layout.setContentsMargins(10, 18, 10, 16)
+            self.side_caption.setVisible(False)
+            self.side_content.setVisible(False)
+            self.btn_toggle_side.setText("›")
+            self.btn_toggle_side.setToolTip("展开分类")
 
     def _switch_view(self, index: int) -> None:
         self.btn_cal.setChecked(index == 0)
@@ -223,11 +260,9 @@ class MainWindow(QMainWindow):
         for view in views:
             if hasattr(view, "refresh"):
                 view.refresh()
-        for panel in list(self._day_panels):
-            if panel.isVisible():
-                panel.reload()
-            else:
-                self._day_panels.remove(panel)
+        detail = getattr(self, "day_detail", None)
+        if detail is not None and detail.isVisible():
+            detail.reload()
 
     def _toggle_theme(self) -> None:
         new = "dark" if get_theme(self.conn) == "light" else "light"
@@ -269,12 +304,4 @@ class MainWindow(QMainWindow):
         self.refresh_views()
 
     def _show_day_panel(self, day: date) -> None:
-        from app.ui.day_panel import DayPanel
-
-        panel = DayPanel(self.conn, day, self)
-        panel.plan_activated.connect(self._edit_plan)
-        panel.plan_activated.connect(panel.reload)
-        panel.new_plan_requested.connect(self._new_plan_on)
-        panel.new_plan_requested.connect(lambda _: panel.reload())
-        panel.show()
-        self._day_panels.append(panel)
+        self.day_detail.show_day(day)

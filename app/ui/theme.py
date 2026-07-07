@@ -94,6 +94,104 @@ QWidget#sidePanel {{
     background: {sidebar};
     border-right: 1px solid {border};
 }}
+QWidget#detailPanel {{
+    background: {paper};
+    border-left: 1px solid {border};
+    border-top-left-radius: 14px;
+    border-bottom-left-radius: 14px;
+}}
+QLabel#detailTitle {{
+    color: {text};
+    font-size: 18px;
+    font-weight: 800;
+}}
+QLabel#detailSection {{
+    color: {muted};
+    font-size: 12px;
+    font-weight: 800;
+}}
+QFrame#detailCard {{
+    background: {surface};
+    border: 1px solid {border};
+    border-radius: 12px;
+}}
+QLabel#detailPlanTitle {{
+    color: {text};
+    font-size: 17px;
+    font-weight: 800;
+}}
+QLabel#detailBadge {{
+    background: {accent_faint};
+    color: {accent_deep};
+    border: 1px solid {accent_soft};
+    border-radius: 10px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 800;
+}}
+QLabel#detailNote {{
+    background: {accent_faint};
+    color: {text};
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 9px 10px;
+}}
+QLabel#emptyDetail {{
+    color: {muted};
+    background: {surface};
+    border: 1px dashed {border_strong};
+    border-radius: 12px;
+    padding: 14px;
+}}
+QScrollArea#detailScroll {{
+    background: transparent;
+    border: none;
+}}
+QListWidget#dayPlanList {{
+    background: {surface};
+    border-color: {border};
+}}
+QListWidget#dayPlanList::item {{
+    min-height: 28px;
+    padding: 8px 10px;
+}}
+QFrame#linkRow {{
+    background: {surface};
+    border: 1px solid {border};
+    border-radius: 12px;
+}}
+QFrame#linkRow:hover {{
+    border-color: {border_strong};
+    background: {hover};
+}}
+QLabel#linkTitle {{
+    color: {text};
+    font-weight: 800;
+}}
+QLabel#linkPath {{
+    color: {muted};
+    font-size: 12px;
+}}
+QLabel#pathMissing {{
+    color: {danger};
+    font-size: 12px;
+}}
+QPushButton#linkButton {{
+    background: {accent_faint};
+    color: {accent_deep};
+    border-color: transparent;
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-weight: 800;
+}}
+QPushButton#linkButton:hover {{
+    background: {accent_soft};
+    border-color: {accent};
+}}
+QPushButton#linkButton:disabled {{
+    background: {paper_alt};
+    color: {muted};
+}}
 QToolBar {{
     background: {window};
     border: none;

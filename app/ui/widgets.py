@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from PySide6.QtCore import QDate, Qt, QTimer
+from PySide6.QtCore import QDate, QRect, Qt, QTimer
+from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QCalendarWidget, QDateEdit, QToolButton, QWidget
 
 DATE_DISPLAY_FORMAT = "yyyy年M月d日"
@@ -62,3 +63,45 @@ class ModernDateEdit(QDateEdit):
         self.setCalendarWidget(ModernCalendarWidget(self))
         if date is not None:
             self.setDate(date)
+
+    def paintEvent(self, event) -> None:
+        super().paintEvent(event)
+        self._draw_calendar_icon()
+
+    def _draw_calendar_icon(self) -> None:
+        rect = self.rect()
+        icon_rect = QRect(rect.right() - 23, rect.center().y() - 7, 14, 14)
+        if not icon_rect.isValid():
+            return
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        color = self.palette().highlight().color()
+        if not self.isEnabled():
+            color = QColor("#9AA4B2")
+        pen = QPen(color)
+        pen.setWidthF(1.4)
+        pen.setCapStyle(Qt.RoundCap)
+        pen.setJoinStyle(Qt.RoundJoin)
+        painter.setPen(pen)
+        painter.setBrush(Qt.NoBrush)
+        painter.drawRoundedRect(icon_rect.adjusted(1, 2, -1, -1), 2, 2)
+        painter.drawLine(
+            icon_rect.left() + 1,
+            icon_rect.top() + 6,
+            icon_rect.right() - 1,
+            icon_rect.top() + 6,
+        )
+        painter.drawLine(
+            icon_rect.left() + 4,
+            icon_rect.top() + 1,
+            icon_rect.left() + 4,
+            icon_rect.top() + 4,
+        )
+        painter.drawLine(
+            icon_rect.right() - 4,
+            icon_rect.top() + 1,
+            icon_rect.right() - 4,
+            icon_rect.top() + 4,
+        )
+        painter.end()

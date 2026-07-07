@@ -25,6 +25,13 @@ from app.ui.widgets import ModernDateEdit
 
 ALL = "ALL"
 COLUMNS = ["状态", "标题", "分类", "开始", "结束", "绑定"]
+COLUMN_WIDTHS = {
+    0: 82,
+    2: 116,
+    3: 112,
+    4: 112,
+    5: 72,
+}
 
 
 class ListView(QWidget):
@@ -75,7 +82,7 @@ class ListView(QWidget):
         layout.addWidget(bar_widget)
         self.table = QTableWidget(0, len(COLUMNS))
         self.table.setHorizontalHeaderLabels(COLUMNS)
-        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self._configure_table_columns()
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         self.table.verticalHeader().setVisible(False)
@@ -89,6 +96,17 @@ class ListView(QWidget):
         self.to_edit.dateChanged.connect(lambda _: self.refresh())
         self.table.itemDoubleClicked.connect(self._on_double_click)
         self.refresh()
+
+    def _configure_table_columns(self) -> None:
+        header = self.table.horizontalHeader()
+        header.setDefaultAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        header.setStretchLastSection(False)
+        for col in range(len(COLUMNS)):
+            if col == 1:
+                header.setSectionResizeMode(col, QHeaderView.Stretch)
+            else:
+                header.setSectionResizeMode(col, QHeaderView.Fixed)
+                self.table.setColumnWidth(col, COLUMN_WIDTHS[col])
 
     def _rebuild_cat_combo(self) -> None:
         current = self.cat_combo.currentData()
@@ -146,6 +164,10 @@ class ListView(QWidget):
             ]
             for col, item in enumerate(cells):
                 item.setData(Qt.UserRole, p.id)
+                if col in (3, 4, 5):
+                    item.setTextAlignment(Qt.AlignCenter)
+                else:
+                    item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                 self.table.setItem(row, col, item)
 
     def _on_double_click(self, item: QTableWidgetItem) -> None:

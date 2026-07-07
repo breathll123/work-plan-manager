@@ -114,7 +114,7 @@ class YearView(QWidget):
         title_font.setBold(True)
         title_font.setPointSize(max(title_font.pointSize() + 3, 14))
         painter.setFont(title_font)
-        painter.setPen(QColor(c["cal_overdue"]))
+        painter.setPen(QColor(c["accent_deep"]))
         painter.drawText(
             rect.left(),
             rect.top(),
@@ -135,7 +135,7 @@ class YearView(QWidget):
 
         painter.setPen(QColor(c["muted"]))
         for i, name in enumerate(WEEKDAYS):
-            painter.setPen(QColor(c["cal_overdue"] if i in (0, 6) else c["muted"]))
+            painter.setPen(QColor(c["warning"] if i in (0, 6) else c["muted"]))
             painter.drawText(
                 QRect(int(rect.left() + i * cell_w), header_y, int(cell_w), 18),
                 Qt.AlignCenter,
@@ -158,18 +158,22 @@ class YearView(QWidget):
             self._day_cells.append((cell, day))
             in_month = day.month == month
             is_weekend = col in (0, 6)
+            is_today = day == today and in_month
             if is_weekend:
                 painter.setPen(Qt.NoPen)
                 painter.setBrush(QColor(c["cal_weekend_bg"]))
                 painter.drawRoundedRect(cell.adjusted(1, 1, -1, -1), 4, 4)
-            if day == today:
+            if is_today:
                 painter.setPen(Qt.NoPen)
-                painter.setBrush(QColor(c["cal_overdue"]))
-                size = min(cell.width(), cell.height(), 22)
-                dot = QRect(0, 0, size, size)
-                dot.moveCenter(cell.center())
-                painter.drawEllipse(dot)
-                painter.setPen(QColor("#FFFFFF"))
+                painter.setBrush(QColor(c["cal_today_bg"]))
+                today_rect = cell.adjusted(2, 1, -2, -1)
+                painter.drawRoundedRect(today_rect, 5, 5)
+                pen = QPen(QColor(c["cal_today"]))
+                pen.setWidth(1)
+                painter.setPen(pen)
+                painter.setBrush(Qt.NoBrush)
+                painter.drawRoundedRect(today_rect, 5, 5)
+                painter.setPen(QColor(c["accent_deep"]))
             else:
                 painter.setPen(QColor(c["text"] if in_month else c["cal_out"]))
             painter.drawText(

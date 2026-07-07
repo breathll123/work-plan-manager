@@ -96,7 +96,7 @@ class CalendarView(QWidget):
         painter.setPen(QColor(c["muted"]))
         for i, name in enumerate(WEEKDAYS):
             if i >= 5:
-                painter.setPen(QColor(c["cal_overdue"]))
+                painter.setPen(QColor(c["warning"]))
             else:
                 painter.setPen(QColor(c["muted"]))
             painter.drawText(
@@ -114,29 +114,41 @@ class CalendarView(QWidget):
                 x = int(left + di * cell_w)
                 rect = QRect(x, y, int(cell_w), int(cell_h))
                 self._day_cells.append((rect, day))
+                is_today = day == today
                 if di >= 5:
                     painter.setPen(Qt.NoPen)
                     painter.setBrush(QColor(c["cal_weekend_bg"]))
-                    painter.drawRect(rect.adjusted(1, 1, -1, -1))
-                elif (wi + di) % 2 == 0:
+                    painter.drawRoundedRect(rect.adjusted(3, 3, -3, -3), 8, 8)
+                if is_today:
                     painter.setPen(Qt.NoPen)
-                    painter.setBrush(QColor(c["paper_alt"]))
-                    painter.drawRect(rect.adjusted(1, 1, -1, -1))
+                    painter.setBrush(QColor(c["cal_today_bg"]))
+                    painter.drawRoundedRect(rect.adjusted(4, 4, -4, -4), 9, 9)
                 painter.setPen(QColor(c["cal_grid"]))
                 painter.setBrush(Qt.NoBrush)
                 painter.drawRect(rect)
-                if day == today:
+                if is_today:
                     pen = QPen(QColor(c["cal_today"]))
                     pen.setWidth(2)
                     painter.setPen(pen)
-                    painter.drawRect(rect.adjusted(1, 1, -1, -1))
+                    painter.drawRoundedRect(rect.adjusted(4, 4, -4, -4), 9, 9)
                 in_month = day.month == month
-                painter.setPen(QColor(c["text"] if in_month else c["cal_out"]))
+                date_font = painter.font()
+                date_font.setBold(is_today)
+                painter.setFont(date_font)
+                painter.setPen(
+                    QColor(
+                        c["accent_deep"]
+                        if is_today
+                        else c["text"] if in_month else c["cal_out"]
+                    )
+                )
                 painter.drawText(
                     QRect(x, y + 2, int(cell_w) - 6, DAY_NUM_H),
                     Qt.AlignRight | Qt.AlignTop,
                     str(day.day),
                 )
+                date_font.setBold(False)
+                painter.setFont(date_font)
             self._draw_week_bars(
                 painter, c, week, wi, left, grid_top, cell_w, cell_h, today
             )

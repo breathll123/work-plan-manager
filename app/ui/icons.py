@@ -3,10 +3,10 @@ from __future__ import annotations
 from PySide6.QtCore import QPoint, QRect, QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap
 
-ICON_COLOR = "#1D4ED8"
+ICON_COLOR = "#2E7D6B"
 
 
-def icon(name: str, color: str = ICON_COLOR, size: int = 18) -> QIcon:
+def _draw(name: str, color: str, size: int) -> QPixmap:
     pix = QPixmap(size, size)
     pix.fill(Qt.transparent)
     p = QPainter(pix)
@@ -80,6 +80,11 @@ def icon(name: str, color: str = ICON_COLOR, size: int = 18) -> QIcon:
         p.drawLine(QPoint(s - 4, s // 2), QPoint(s - 2, s // 2))
     elif name == "moon":
         p.drawArc(QRectF(5, 3, s - 8, s - 6), 70 * 16, 260 * 16)
+    elif name == "auto":
+        p.drawEllipse(QRectF(3, 3, s - 6, s - 6))
+        p.setBrush(QColor(color))
+        p.drawPie(QRectF(3, 3, s - 6, s - 6), 90 * 16, 180 * 16)
+        p.setBrush(Qt.NoBrush)
     elif name == "close":
         p.drawLine(QPoint(5, 5), QPoint(s - 5, s - 5))
         p.drawLine(QPoint(s - 5, 5), QPoint(5, s - 5))
@@ -91,7 +96,15 @@ def icon(name: str, color: str = ICON_COLOR, size: int = 18) -> QIcon:
         p.drawLine(QPoint(s // 2, 12), QPoint(s - 5, 7))
 
     p.end()
-    return QIcon(pix)
+    return pix
+
+
+def icon(name: str, color: str = ICON_COLOR, size: int = 18,
+         checked_color: str | None = None) -> QIcon:
+    ic = QIcon(_draw(name, color, size))
+    if checked_color:
+        ic.addPixmap(_draw(name, checked_color, size), QIcon.Normal, QIcon.On)
+    return ic
 
 
 def app_icon(size: int = 64) -> QIcon:
@@ -101,7 +114,7 @@ def app_icon(size: int = 64) -> QIcon:
     p.setRenderHint(QPainter.Antialiasing)
     bg = QPainterPath()
     bg.addRoundedRect(QRectF(4, 4, size - 8, size - 8), 14, 14)
-    p.fillPath(bg, QColor("#2563EB"))
+    p.fillPath(bg, QColor("#2E7D6B"))
     pen = QPen(QColor("#FFFFFF"))
     pen.setWidth(4)
     pen.setStyle(Qt.SolidLine)
@@ -118,6 +131,7 @@ def app_icon(size: int = 64) -> QIcon:
     return QIcon(pix)
 
 
-def set_button_icon(button, name: str, color: str = ICON_COLOR, size: int = 18) -> None:
-    button.setIcon(icon(name, color, size))
+def set_button_icon(button, name: str, color: str = ICON_COLOR, size: int = 18,
+                    checked_color: str | None = None) -> None:
+    button.setIcon(icon(name, color, size, checked_color))
     button.setIconSize(QSize(size, size))

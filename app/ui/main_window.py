@@ -18,11 +18,19 @@ from PySide6.QtWidgets import (
 
 from app.services.category_service import CategoryService
 from app.services.plan_service import PlanService
-from app.services.settings_service import get_theme, set_theme
+from app.services.settings_service import (
+    THEME_DARK,
+    THEME_LIGHT,
+    THEME_SYSTEM,
+    get_theme,
+    set_theme,
+)
 from app.ui.icons import app_icon, set_button_icon
-from app.ui.theme import apply_theme
+from app.ui.theme import apply_theme, colors, resolve_theme
 
 UNCATEGORIZED = None
+
+THEME_CYCLE = [THEME_SYSTEM, THEME_LIGHT, THEME_DARK]
 
 
 class MainWindow(QMainWindow):
@@ -43,6 +51,22 @@ class MainWindow(QMainWindow):
         self.refresh_views()
         self.btn_manage_cats.clicked.connect(self._open_category_dialog)
         self.btn_new.clicked.connect(self._new_plan)
+        self._watch_system_scheme()
+
+    def _watch_system_scheme(self) -> None:
+        from PySide6.QtWidgets import QApplication
+
+        hints = QApplication.instance().styleHints()
+        if hasattr(hints, "colorSchemeChanged"):
+            hints.colorSchemeChanged.connect(self._on_system_scheme_changed)
+
+    def _on_system_scheme_changed(self, *_args) -> None:
+        if get_theme(self.conn) == THEME_SYSTEM:
+            from PySide6.QtWidgets import QApplication
+
+            apply_theme(QApplication.instance(), THEME_SYSTEM)
+            self._sync_theme_button()
+            self.refresh_views()
 
     def _build_toolbar(self) -> None:
         self.toolbar = QToolBar()
@@ -267,7 +291,9 @@ class MainWindow(QMainWindow):
             detail.reload()
 
     def _toggle_theme(self) -> None:
-        new = "dark" if get_theme(self.conn) == "light" else "light"
+        current = get_theme(self.conn)
+        idx = THEME_CYCLE.index(current) if current in THEME_CYCLE else 0
+        new = THEME_CYCLE[(idx + 1) % len(THEME_CYCLE)]
         set_theme(self.conn, new)
         from PySide6.QtWidgets import QApplication
 
@@ -276,9 +302,31 @@ class MainWindow(QMainWindow):
         self.refresh_views()
 
     def _sync_theme_button(self) -> None:
-        dark = get_theme(self.conn) == "dark"
-        self.btn_theme.setText("浅色" if dark else "深色")
-        set_button_icon(self.btn_theme, "sun" if dark else "moon")
+        mode = get_theme(self.conn)
+        if mode == THEME_SYSTEM:
+            self.btn_theme.setText("跟随系统")
+            theme_icon = "auto"
+        elif mode == THEME_DARK:
+            self.btn_theme.setText("深色")
+            theme_icon = "moon"
+        else:
+            self.btn_theme.setText("浅色")
+            theme_icon = "sun"
+        self.btn_theme.setToolTip("点击切换:跟随系统 → 浅色 → 深色")
+        c = colors(mode)
+        dark = resolve_theme(mode) == THEME_DARK
+        icon_color = c["accent_deep"] if dark else c["accent"]
+        set_button_icon(self.btn_theme, theme_icon, color=icon_color)
+        set_button_icon(self.btn_today, "calendar", color=icon_color)
+        for btn, name in (
+            (self.btn_cal, "calendar"),
+            (self.btn_list, "list"),
+            (self.btn_year, "year"),
+        ):
+            set_button_icon(
+                btn, name, color=icon_color, checked_color=c["on_accent"]
+            )
+        set_button_icon(self.btn_new, "plus", color=c["on_accent"])
 
     def _open_category_dialog(self) -> None:
         from app.ui.category_dialog import CategoryDialog

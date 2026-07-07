@@ -22,13 +22,19 @@ def test_set_then_get_overwrites(conn):
     assert get_setting(conn, "k", "") == "v2"
 
 
-def test_theme_default_light(conn):
-    assert get_theme(conn) == "light"
+def test_theme_default_follows_system(conn):
+    assert get_theme(conn) == "system"
 
 
 def test_theme_roundtrip(conn):
     set_theme(conn, "dark")
     assert get_theme(conn) == "dark"
+
+
+def test_theme_accepts_system(conn):
+    set_theme(conn, "light")
+    set_theme(conn, "system")
+    assert get_theme(conn) == "system"
 
 
 def test_theme_rejects_unknown(conn):

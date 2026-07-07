@@ -1,86 +1,92 @@
 from __future__ import annotations
 
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication
 
+# 配色主题「宣纸墨砚」:
+# 浅色 = 暖纸底 + 墨色文字 + 竹青主色;深色 = 墨炭底 + 青瓷主色。
+# 语义色保持:红 = 逾期/节假日,青蓝 = 节气,琥珀 = 系统提醒。
 COLORS = {
     "light": {
-        "window": "#F5F7FA",
-        "surface": "#FFFFFF",
-        "base": "#FFFFFF",
-        "paper": "#FFFFFF",
-        "paper_alt": "#F1F4F8",
-        "sidebar": "#FFFFFF",
-        "sidebar_text": "#1E293B",
-        "sidebar_muted": "#667085",
-        "sidebar_button_bg": "#F3F6FA",
-        "sidebar_button_border": "#D7DEE8",
-        "text": "#1E293B",
-        "muted": "#667085",
-        "border": "#D8DEE8",
-        "border_strong": "#B8C2D0",
-        "accent": "#2563EB",
-        "accent_deep": "#1D4ED8",
-        "accent_soft": "#DBEAFE",
-        "accent_faint": "#EFF6FF",
-        "hover": "#F1F5F9",
-        "sel_bg": "#DBEAFE",
-        "cal_grid": "#D5DCE8",
-        "cal_out": "#9AA4B2",
-        "cal_today": "#2563EB",
-        "cal_today_bg": "#F1F6FF",
-        "cal_overdue": "#DC2626",
-        "cal_done_bg": "#E5E7EB",
-        "cal_done_text": "#8A94A6",
-        "cal_weekend_bg": "#FFF7ED",
-        "holiday_bg": "#FEE2E2",
-        "holiday_text": "#B42318",
-        "solar_term_bg": "#E0F2FE",
-        "solar_term_text": "#0369A1",
-        "system_bar_bg": "#D97706",
-        "system_bar_text": "#FFF7ED",
-        "danger": "#DC2626",
-        "danger_soft": "#FEE2E2",
-        "warning": "#B45309",
+        "window": "#F6F2E9",
+        "surface": "#FDFBF5",
+        "base": "#FDFBF5",
+        "paper": "#FDFBF5",
+        "paper_alt": "#F0EBDD",
+        "sidebar": "#FDFBF5",
+        "sidebar_text": "#33312B",
+        "sidebar_muted": "#8A8471",
+        "sidebar_button_bg": "#F2EDDF",
+        "sidebar_button_border": "#DCD4BE",
+        "text": "#33312B",
+        "muted": "#8A8471",
+        "border": "#E1DAC6",
+        "border_strong": "#C6BCA1",
+        "accent": "#2E7D6B",
+        "accent_deep": "#1E5D4E",
+        "accent_soft": "#D5E8DF",
+        "accent_faint": "#EBF3EE",
+        "on_accent": "#FFFFFF",
+        "hover": "#F0EADC",
+        "sel_bg": "#D5E8DF",
+        "cal_grid": "#DFD7C2",
+        "cal_out": "#B3AC98",
+        "cal_today": "#2E7D6B",
+        "cal_today_bg": "#E6F1EA",
+        "cal_overdue": "#C24732",
+        "cal_done_bg": "#EAE3D2",
+        "cal_done_text": "#9B937E",
+        "cal_weekend_bg": "#F8EEDC",
+        "holiday_bg": "#F6DFD3",
+        "holiday_text": "#AE3A24",
+        "solar_term_bg": "#DFEAEC",
+        "solar_term_text": "#366F7D",
+        "system_bar_bg": "#B67A1C",
+        "system_bar_text": "#FFF6E2",
+        "danger": "#C24732",
+        "danger_soft": "#F6DFD3",
+        "warning": "#9C6716",
     },
     "dark": {
-        "window": "#2A2724",
-        "surface": "#34302C",
-        "base": "#37332F",
-        "paper": "#302D29",
-        "paper_alt": "#393530",
-        "sidebar": "#252C2A",
-        "sidebar_text": "#F0ECE4",
-        "sidebar_muted": "#B9C8BF",
-        "sidebar_button_bg": "#33413D",
-        "sidebar_button_border": "#52635E",
-        "text": "#F0ECE4",
-        "muted": "#B6AEA4",
-        "border": "#514B45",
-        "border_strong": "#6B6259",
-        "accent": "#72C8B8",
-        "accent_deep": "#9CE3D7",
-        "accent_soft": "#2F504A",
-        "accent_faint": "#303B37",
-        "hover": "#3E3934",
-        "sel_bg": "#2F504A",
-        "cal_grid": "#504A43",
-        "cal_out": "#7B736A",
-        "cal_today": "#72C8B8",
-        "cal_today_bg": "#243538",
-        "cal_overdue": "#F07D70",
-        "cal_done_bg": "#3C3934",
-        "cal_done_text": "#8F897F",
-        "cal_weekend_bg": "#40362F",
-        "holiday_bg": "#523B35",
-        "holiday_text": "#F2A197",
-        "solar_term_bg": "#2B514B",
-        "solar_term_text": "#9DE1D4",
-        "system_bar_bg": "#74460E",
-        "system_bar_text": "#FFB340",
-        "danger": "#F07D70",
-        "danger_soft": "#4A332E",
-        "warning": "#D59A3C",
+        "window": "#1F2321",
+        "surface": "#282D2A",
+        "base": "#282D2A",
+        "paper": "#252A27",
+        "paper_alt": "#303632",
+        "sidebar": "#282D2A",
+        "sidebar_text": "#ECE7DA",
+        "sidebar_muted": "#A49E8D",
+        "sidebar_button_bg": "#333936",
+        "sidebar_button_border": "#4A524D",
+        "text": "#ECE7DA",
+        "muted": "#A09A89",
+        "border": "#3B423E",
+        "border_strong": "#545C56",
+        "accent": "#7CC3AD",
+        "accent_deep": "#A6DBC7",
+        "accent_soft": "#2C473F",
+        "accent_faint": "#293632",
+        "on_accent": "#14251F",
+        "hover": "#313734",
+        "sel_bg": "#2C473F",
+        "cal_grid": "#3A403C",
+        "cal_out": "#6F6B5E",
+        "cal_today": "#7CC3AD",
+        "cal_today_bg": "#263630",
+        "cal_overdue": "#E4735B",
+        "cal_done_bg": "#323733",
+        "cal_done_text": "#8A8577",
+        "cal_weekend_bg": "#2E2C24",
+        "holiday_bg": "#452F29",
+        "holiday_text": "#F09F8C",
+        "solar_term_bg": "#283F45",
+        "solar_term_text": "#8FC6D2",
+        "system_bar_bg": "#6D4A13",
+        "system_bar_text": "#FFC862",
+        "danger": "#E4735B",
+        "danger_soft": "#44302A",
+        "warning": "#D8A64F",
     },
 }
 
@@ -227,7 +233,7 @@ QPushButton:checked {{
 }}
 QPushButton#primaryButton {{
     background: {accent};
-    color: #FFFFFF;
+    color: {on_accent};
     border-color: {accent};
     font-weight: 700;
 }}
@@ -277,7 +283,7 @@ QPushButton#segmentButton:hover {{
 QPushButton#segmentButton:checked {{
     background: {accent};
     border-color: {accent};
-    color: #FFFFFF;
+    color: {on_accent};
 }}
 QPushButton#statusPill {{
     background: {accent_faint};
@@ -290,7 +296,7 @@ QPushButton#statusPill {{
 QPushButton#statusPill:checked {{
     background: {accent};
     border-color: {accent};
-    color: #FFFFFF;
+    color: {on_accent};
 }}
 QPushButton#sidebarButton {{
     background: {sidebar_button_bg};
@@ -446,7 +452,7 @@ QCalendarWidget QAbstractItemView::item:hover {{
 }}
 QCalendarWidget QAbstractItemView::item:selected {{
     background: {accent};
-    color: #FFFFFF;
+    color: {on_accent};
     border: none;
     outline: none;
 }}
@@ -615,8 +621,25 @@ QWidget#sidePanel QPushButton#sidebarToggle:focus {{
 """
 
 
+def system_color_scheme() -> str:
+    """读取操作系统当前的深浅色偏好,读不到时按浅色处理。"""
+    app = QApplication.instance()
+    if app is None:
+        return "light"
+    try:
+        scheme = app.styleHints().colorScheme()
+    except AttributeError:
+        return "light"
+    return "dark" if scheme == Qt.ColorScheme.Dark else "light"
+
+
+def resolve_theme(name: str) -> str:
+    """把主题设置(system/light/dark)解析成实际生效的 light/dark。"""
+    return system_color_scheme() if name == "system" else name
+
+
 def colors(name: str) -> dict[str, str]:
-    return COLORS.get(name, COLORS["light"])
+    return COLORS.get(resolve_theme(name), COLORS["light"])
 
 
 def apply_theme(app: QApplication, name: str) -> None:
@@ -629,6 +652,6 @@ def apply_theme(app: QApplication, name: str) -> None:
     pal.setColor(QPalette.Button, QColor(c["base"]))
     pal.setColor(QPalette.ButtonText, QColor(c["text"]))
     pal.setColor(QPalette.Highlight, QColor(c["accent"]))
-    pal.setColor(QPalette.HighlightedText, QColor("#FFFFFF"))
+    pal.setColor(QPalette.HighlightedText, QColor(c["on_accent"]))
     app.setPalette(pal)
     app.setStyleSheet(QSS.format(**c))

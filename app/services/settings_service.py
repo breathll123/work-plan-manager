@@ -6,6 +6,7 @@ from datetime import date
 THEME_KEY = "theme"
 THEME_LIGHT = "light"
 THEME_DARK = "dark"
+THEME_SYSTEM = "system"
 SYSTEM_REMINDER_PREFIX = "system_reminder_shown:"
 
 
@@ -24,12 +25,12 @@ def set_setting(conn: sqlite3.Connection, key: str, value: str) -> None:
 
 
 def get_theme(conn: sqlite3.Connection) -> str:
-    return get_setting(conn, THEME_KEY, THEME_LIGHT)
+    return get_setting(conn, THEME_KEY, THEME_SYSTEM)
 
 
 def set_theme(conn: sqlite3.Connection, name: str) -> None:
-    if name not in {THEME_LIGHT, THEME_DARK}:
-        raise ValueError("主题只能是 light 或 dark")
+    if name not in {THEME_LIGHT, THEME_DARK, THEME_SYSTEM}:
+        raise ValueError("主题只能是 system、light 或 dark")
     set_setting(conn, THEME_KEY, name)
 
 

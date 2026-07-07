@@ -7,7 +7,6 @@ from PySide6.QtCore import QDate, Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QButtonGroup,
-    QComboBox,
     QDialog,
     QFileDialog,
     QFormLayout,
@@ -28,7 +27,7 @@ from app.data.models import STATUS_NAMES
 from app.services.category_service import CategoryService
 from app.services.plan_service import PlanService
 from app.ui.icons import set_button_icon
-from app.ui.widgets import ModernDateEdit
+from app.ui.widgets import ModernComboBox, ModernDateEdit
 
 
 def _to_qdate(d: date) -> QDate:
@@ -80,7 +79,7 @@ class PlanDialog(QDialog):
         self.title_edit = QLineEdit()
         self.title_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         form.addRow(_form_label("标题"), self.title_edit)
-        self.cat_combo = QComboBox()
+        self.cat_combo = ModernComboBox()
         self.cat_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.cat_combo.addItem("未分类", None)
         for c in self.cat_svc.list_all():

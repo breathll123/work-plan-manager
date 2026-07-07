@@ -331,6 +331,10 @@ QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QTextEdit:focus, QSpinBox:foc
 QComboBox {{
     padding-right: 30px;
 }}
+QComboBox:on {{
+    border-color: {accent};
+    background: {accent_faint};
+}}
 QComboBox::drop-down {{
     subcontrol-origin: padding;
     subcontrol-position: top right;
@@ -345,6 +349,9 @@ QComboBox::down-arrow {{
     width: 0;
     height: 0;
 }}
+QComboBox::drop-down:hover {{
+    background: {accent_soft};
+}}
 QComboBox QAbstractItemView {{
     background: {surface};
     color: {text};
@@ -354,6 +361,30 @@ QComboBox QAbstractItemView {{
     outline: none;
     selection-background-color: {accent_soft};
     selection-color: {text};
+}}
+QListView#comboPopup {{
+    background: {surface};
+    color: {text};
+    border: 1px solid {border_strong};
+    border-radius: 12px;
+    padding: 6px;
+    outline: none;
+    selection-background-color: {accent_faint};
+    selection-color: {accent_deep};
+}}
+QListView#comboPopup::item {{
+    min-height: 30px;
+    padding: 7px 10px;
+    border-radius: 8px;
+}}
+QListView#comboPopup::item:hover {{
+    background: {hover};
+    color: {text};
+}}
+QListView#comboPopup::item:selected {{
+    background: {accent_faint};
+    color: {accent_deep};
+    font-weight: 800;
 }}
 QDateEdit::drop-down {{
     subcontrol-origin: padding;

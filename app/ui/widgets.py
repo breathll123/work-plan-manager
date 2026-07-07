@@ -2,9 +2,52 @@ from __future__ import annotations
 
 from PySide6.QtCore import QDate, QRect, Qt, QTimer
 from PySide6.QtGui import QColor, QPainter, QPen
-from PySide6.QtWidgets import QCalendarWidget, QDateEdit, QToolButton, QWidget
+from PySide6.QtWidgets import (
+    QCalendarWidget,
+    QComboBox,
+    QDateEdit,
+    QListView,
+    QToolButton,
+    QWidget,
+)
 
 DATE_DISPLAY_FORMAT = "yyyy年M月d日"
+
+
+class ModernComboBox(QComboBox):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setMinimumHeight(34)
+        self.setMaxVisibleItems(10)
+        popup = QListView(self)
+        popup.setObjectName("comboPopup")
+        popup.setUniformItemSizes(True)
+        popup.setMouseTracking(True)
+        popup.setSpacing(2)
+        self.setView(popup)
+
+    def paintEvent(self, event) -> None:
+        super().paintEvent(event)
+        self._draw_arrow()
+
+    def _draw_arrow(self) -> None:
+        rect = self.rect()
+        center_x = rect.right() - 15
+        center_y = rect.center().y() + 1
+        color = self.palette().highlight().color()
+        if not self.isEnabled():
+            color = QColor("#9AA4B2")
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        pen = QPen(color)
+        pen.setWidthF(1.8)
+        pen.setCapStyle(Qt.RoundCap)
+        pen.setJoinStyle(Qt.RoundJoin)
+        painter.setPen(pen)
+        painter.drawLine(center_x - 4, center_y - 2, center_x, center_y + 2)
+        painter.drawLine(center_x, center_y + 2, center_x + 4, center_y - 2)
+        painter.end()
 
 
 class ModernCalendarWidget(QCalendarWidget):

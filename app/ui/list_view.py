@@ -8,7 +8,6 @@ from PySide6.QtCore import QDate, Qt, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QCheckBox,
-    QComboBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -21,7 +20,7 @@ from PySide6.QtWidgets import (
 from app.data.models import STATUS_DONE, STATUS_NAMES
 from app.services.category_service import CategoryService
 from app.services.plan_service import PlanService
-from app.ui.widgets import ModernDateEdit
+from app.ui.widgets import ModernComboBox, ModernDateEdit
 
 ALL = "ALL"
 COLUMNS = ["状态", "标题", "分类", "开始", "结束", "绑定"]
@@ -52,9 +51,9 @@ class ListView(QWidget):
         bar = QHBoxLayout(bar_widget)
         bar.setContentsMargins(12, 10, 12, 10)
         bar.setSpacing(8)
-        self.cat_combo = QComboBox()
+        self.cat_combo = ModernComboBox()
         self.cat_combo.setMinimumWidth(128)
-        self.status_combo = QComboBox()
+        self.status_combo = ModernComboBox()
         self.status_combo.setMinimumWidth(118)
         self.status_combo.addItem("全部状态", None)
         for value, name in STATUS_NAMES.items():

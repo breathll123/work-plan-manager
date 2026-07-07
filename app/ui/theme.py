@@ -309,6 +309,11 @@ QLabel#fieldLabel {{
     font-weight: 800;
     padding-left: 2px;
 }}
+QLabel#formLabel {{
+    color: {muted};
+    font-weight: 800;
+    padding-top: 2px;
+}}
 QLineEdit, QComboBox, QDateEdit, QTextEdit, QSpinBox {{
     background: {surface};
     border: 1px solid {border};

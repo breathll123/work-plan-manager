@@ -99,7 +99,7 @@ class ListView(QWidget):
 
     def _configure_table_columns(self) -> None:
         header = self.table.horizontalHeader()
-        header.setDefaultAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        header.setDefaultAlignment(Qt.AlignCenter)
         header.setStretchLastSection(False)
         for col in range(len(COLUMNS)):
             if col == 1:
@@ -164,10 +164,7 @@ class ListView(QWidget):
             ]
             for col, item in enumerate(cells):
                 item.setData(Qt.UserRole, p.id)
-                if col in (3, 4, 5):
-                    item.setTextAlignment(Qt.AlignCenter)
-                else:
-                    item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                item.setTextAlignment(Qt.AlignCenter)
                 self.table.setItem(row, col, item)
 
     def _on_double_click(self, item: QTableWidgetItem) -> None:

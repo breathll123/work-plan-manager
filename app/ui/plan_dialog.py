@@ -35,6 +35,14 @@ def _to_qdate(d: date) -> QDate:
     return QDate(d.year, d.month, d.day)
 
 
+def _form_label(text: str) -> QLabel:
+    label = QLabel(text)
+    label.setObjectName("formLabel")
+    label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+    label.setMinimumHeight(34)
+    return label
+
+
 class PlanDialog(QDialog):
     def __init__(
         self,
@@ -65,19 +73,19 @@ class PlanDialog(QDialog):
         form.setContentsMargins(0, 0, 0, 0)
         form.setHorizontalSpacing(14)
         form.setVerticalSpacing(10)
-        form.setLabelAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        form.setLabelAlignment(Qt.AlignRight | Qt.AlignTop)
         form.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
         form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         form.setRowWrapPolicy(QFormLayout.DontWrapRows)
         self.title_edit = QLineEdit()
         self.title_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        form.addRow("标题", self.title_edit)
+        form.addRow(_form_label("标题"), self.title_edit)
         self.cat_combo = QComboBox()
         self.cat_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.cat_combo.addItem("未分类", None)
         for c in self.cat_svc.list_all():
             self.cat_combo.addItem(c.name, c.id)
-        form.addRow("分类", self.cat_combo)
+        form.addRow(_form_label("分类"), self.cat_combo)
         self.start_edit = ModernDateEdit()
         self.end_edit = ModernDateEdit()
         self.start_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -90,7 +98,7 @@ class PlanDialog(QDialog):
         to_label.setAlignment(Qt.AlignCenter)
         dates.addWidget(to_label)
         dates.addWidget(self.end_edit, 1)
-        form.addRow("日期", dates)
+        form.addRow(_form_label("日期"), dates)
         self.status_group = QButtonGroup(self)
         self.status_group.setExclusive(True)
         status_row = QHBoxLayout()
@@ -103,11 +111,11 @@ class PlanDialog(QDialog):
             self.status_group.addButton(rb, value)
             status_row.addWidget(rb, 1)
         self.status_group.button(0).setChecked(True)
-        form.addRow("状态", status_row)
+        form.addRow(_form_label("状态"), status_row)
         self.note_edit = QTextEdit()
         self.note_edit.setFixedHeight(70)
         self.note_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        form.addRow("备注", self.note_edit)
+        form.addRow(_form_label("备注"), self.note_edit)
         layout.addLayout(form)
         layout.addWidget(QLabel("绑定文件夹 / 文件"))
         self.links_list = QListWidget()

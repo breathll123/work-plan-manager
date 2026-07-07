@@ -166,13 +166,13 @@ class YearView(QWidget):
             if is_today:
                 painter.setPen(Qt.NoPen)
                 painter.setBrush(QColor(c["cal_today_bg"]))
-                today_rect = cell.adjusted(2, 1, -2, -1)
-                painter.drawRoundedRect(today_rect, 5, 5)
+                today_rect = cell.adjusted(1, 0, -1, 0)
+                painter.drawRoundedRect(today_rect, 6, 6)
                 pen = QPen(QColor(c["cal_today"]))
                 pen.setWidth(1)
                 painter.setPen(pen)
                 painter.setBrush(Qt.NoBrush)
-                painter.drawRoundedRect(today_rect, 5, 5)
+                painter.drawRoundedRect(today_rect, 6, 6)
                 painter.setPen(QColor(c["accent_deep"]))
             else:
                 painter.setPen(QColor(c["text"] if in_month else c["cal_out"]))

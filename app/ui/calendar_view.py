@@ -124,7 +124,8 @@ class CalendarView(QWidget):
                 if is_today:
                     painter.setPen(Qt.NoPen)
                     painter.setBrush(QColor(c["cal_today_bg"]))
-                    painter.drawRoundedRect(rect.adjusted(4, 4, -4, -4), 9, 9)
+                    today_rect = rect.adjusted(2, 2, -2, -2)
+                    painter.drawRoundedRect(today_rect, 10, 10)
                 painter.setPen(QColor(c["cal_grid"]))
                 painter.setBrush(Qt.NoBrush)
                 painter.drawRect(rect)
@@ -132,7 +133,7 @@ class CalendarView(QWidget):
                     pen = QPen(QColor(c["cal_today"]))
                     pen.setWidth(2)
                     painter.setPen(pen)
-                    painter.drawRoundedRect(rect.adjusted(4, 4, -4, -4), 9, 9)
+                    painter.drawRoundedRect(today_rect, 10, 10)
                 in_month = day.month == month
                 date_font = painter.font()
                 date_font.setBold(is_today)

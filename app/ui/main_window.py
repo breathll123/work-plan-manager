@@ -113,7 +113,7 @@ class MainWindow(QMainWindow):
         self.side_caption.setObjectName("mutedLabel")
         side_header.addWidget(self.side_caption, stretch=1)
         self.btn_toggle_side = QPushButton("‹")
-        self.btn_toggle_side.setObjectName("navButton")
+        self.btn_toggle_side.setObjectName("sidebarToggle")
         self.btn_toggle_side.setToolTip("收起分类")
         self.btn_toggle_side.clicked.connect(self._toggle_sidebar)
         side_header.addWidget(self.btn_toggle_side)
@@ -175,14 +175,16 @@ class MainWindow(QMainWindow):
             self.btn_toggle_side.setText("‹")
             self.btn_toggle_side.setToolTip("收起分类")
         else:
-            self.side.setFixedWidth(54)
-            self.side_layout.setContentsMargins(10, 18, 10, 16)
+            self.side.setFixedWidth(44)
+            self.side_layout.setContentsMargins(9, 18, 9, 16)
             self.side_caption.setVisible(False)
             self.side_content.setVisible(False)
             self.btn_toggle_side.setText("›")
             self.btn_toggle_side.setToolTip("展开分类")
 
     def _switch_view(self, index: int) -> None:
+        if index != 0:
+            self._hide_day_detail()
         self.btn_cal.setChecked(index == 0)
         self.btn_list.setChecked(index == 1)
         self.btn_year.setChecked(index == 2)
@@ -304,4 +306,11 @@ class MainWindow(QMainWindow):
         self.refresh_views()
 
     def _show_day_panel(self, day: date) -> None:
+        if self._current_view_index() != 0:
+            return
         self.day_detail.show_day(day)
+
+    def _hide_day_detail(self) -> None:
+        detail = getattr(self, "day_detail", None)
+        if detail is not None:
+            detail.hide()
